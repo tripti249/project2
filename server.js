@@ -14,12 +14,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'aapkadinacharya_jwt_secret_2024';
 
 // ─── MongoDB Connection ─────────────────────────────────────────
 mongoose.connect(process.env.MONGO_URI, {
-  dbName: process.env.DB_NAME || 'aapkadinacharya'
+  dbName: process.env.DB_NAME || 'aapkadinacharya',
+  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  connectTimeoutMS: 10000,
 })
   .then(() => console.log('✅  MongoDB Connected to:', process.env.DB_NAME || 'aapkadinacharya'))
   .catch(err => {
     console.error('❌  MongoDB Connection Error:', err.message);
-    // Removed process.exit(1) to keep the server alive for debugging
   });
 
 // ─── Mongoose Schemas & Models ─────────────────────────────────
