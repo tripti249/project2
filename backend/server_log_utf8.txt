@@ -1,0 +1,93 @@
+﻿
+> taskflow-backend@2.0.0 dev
+> nodemon server.js
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+Γùç injected env (5) from .env // tip: Γîÿ enable debugging { debug: true }
+node.exe : 
+node:events:486
+At line:1 char:1
++ & "C:\Program Files\
+nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : 
+NotSpecified: (n    
+ode:events:486:String 
+   ) [], 
+RemoteException
+    + 
+FullyQualifiedError   
+ Id : 
+NativeCommandErr    or
+ 
+      throw er; // 
+Unhandled 'error' 
+event
+      ^
+
+Error: listen 
+EADDRINUSE: address 
+already in use :::5000
+    at Server.setupLis
+tenHandle [as 
+_listen2] 
+(node:net:1948:16)
+    at 
+listenInCluster 
+(node:net:2005:12)
+    at Server.listen 
+(node:net:2110:7)
+    at app.listen (C:\
+Users\Asus\Desktop\pro
+ject2\backend\node_mod
+ules\express\lib\appli
+cation.js:635:24)
+    at 
+Object.<anonymous> (C:
+\Users\Asus\Desktop\pr
+oject2\backend\server.
+js:364:5)
+    at 
+Module._compile (node:
+internal/modules/cjs/l
+oader:1812:14)
+    at Object..js (nod
+e:internal/modules/cjs
+/loader:1943:10)
+    at Module.load (no
+de:internal/modules/cj
+s/loader:1533:32)
+    at Module._load (n
+ode:internal/modules/c
+js/loader:1335:12)
+    at wrapModuleLoad 
+(node:internal/modules
+/cjs/loader:255:19)
+Emitted 'error' event 
+on Server instance at:
+    at emitErrorNT 
+(node:net:1984:8)
+    at process.process
+TicksAndRejections (no
+de:internal/process/ta
+sk_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 5000
+}
+
+Node.js v24.14.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m

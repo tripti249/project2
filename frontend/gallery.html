@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AapkaDINACHARYA — See the app in action. Screenshots and feature previews of India's smartest daily planner." />
+  <title>AapkaDINACHARYA — App Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+
+  <!-- ══ NAVBAR ════════════════════════════════════════════ -->
+  <nav class="p-navbar">
+    <div class="p-nav-inner">
+      <a href="/" class="p-nav-brand">
+        <div class="p-nav-logo-icon">अ</div>
+        <div class="p-nav-logo-text">
+          <span class="p-nav-logo-small">Aapka</span>
+          <span class="p-nav-logo-big">DINACHARYA</span>
+        </div>
+      </a>
+      <div class="p-nav-links" id="nav-links">
+        <a href="/" class="p-nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="/learn" class="p-nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Learn
+        </a>
+        <a href="/gallery" class="p-nav-link active">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Gallery
+        </a>
+        <a href="/about" class="p-nav-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          About
+        </a>
+      </div>
+      <div class="p-nav-right">
+        <a href="/auth" class="p-nav-cta">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Open App
+        </a>
+      </div>
+      <button class="p-nav-hamburger" id="hamburger">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══════════════════════════════════════════════ -->
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <div class="page-hero-badge">🖼 Feature Showcase</div>
+      <h1>See the App <span>In Action</span></h1>
+      <p>Every screen, every feature — beautifully crafted for a seamless productivity experience. Explore what AapkaDINACHARYA looks and feels like.</p>
+    </div>
+  </section>
+
+  <!-- ══ STATS BANNER ═══════════════════════════════════════ -->
+  <section class="page-section" style="padding-bottom: 0;">
+    <div class="stats-banner">
+      <div class="stat-item">
+        <span class="stat-num">5+</span>
+        <span class="stat-lbl">Core Features</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">6</span>
+        <span class="stat-lbl">Task Categories</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">3</span>
+        <span class="stat-lbl">Priority Levels</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">1</span>
+        <span class="stat-lbl">AI Assistant</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">100%</span>
+        <span class="stat-lbl">Responsive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ GALLERY ════════════════════════════════════════════ -->
+  <section class="page-section">
+    <div class="section-tag">📸 Screenshots</div>
+    <h2 class="section-heading">Feature <span>Gallery</span></h2>
+    <p class="section-sub">Browse screenshots of every feature — from the task dashboard to the AI chatbot and profile panel.</p>
+
+    <!-- Filter Tabs -->
+    <div class="gallery-tabs">
+      <button class="gallery-tab-btn active" data-filter="all">All Features</button>
+      <button class="gallery-tab-btn" data-filter="dashboard">Dashboard</button>
+      <button class="gallery-tab-btn" data-filter="tasks">Tasks</button>
+      <button class="gallery-tab-btn" data-filter="auth">Auth</button>
+      <button class="gallery-tab-btn" data-filter="profile">Profile</button>
+      <button class="gallery-tab-btn" data-filter="ai">AI Chat</button>
+    </div>
+
+    <div class="gallery-grid" id="gallery-grid">
+      <!-- 1. Main Dashboard -->
+      <div class="gallery-item animate-up" data-cat="dashboard" onclick="openLightbox('Main Dashboard', 'The central hub for all your productivity. It features a clean navbar, greeting message, quick stats (Total, Active, Done), a completion progress bar, and your primary task list. Real-time updates ensure your data is always current.', 'assets/gallery/dashboard_with_tasks_1775501427983.png')">
+        <div class="gallery-screen normal">
+          <img src="assets/gallery/dashboard_with_tasks_1775501427983.png" alt="Dashboard" class="gallery-image">
+          <div class="gallery-overlay">
+            <div class="gallery-overlay-content">
+              <div class="gallery-overlay-title">Main Dashboard</div>
+              <div class="gallery-overlay-sub">Click to learn more →</div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-caption">
+          <span class="gallery-caption-title">🏠 Main Dashboard</span>
+          <span class="gallery-caption-tag">Dashboard</span>
+        </div>
+      </div>
+
+      <!-- 2. GOPICHANDRA AI -->
+      <div class="gallery-item animate-up delay-1" data-cat="ai" onclick="openLightbox('GOPICHANDRA AI', 'Your personal task assistant. It uses natural language processing to understand commands like \'add laundry to my to-do list tomorrow at 5pm\'. It also answers productivity questions and guides you through the app.', 'assets/gallery/ai_assistant_open_1775501436293.png')">
+        <div class="gallery-screen normal">
+          <img src="assets/gallery/ai_assistant_open_1775501436293.png" alt="AI Agent" class="gallery-image">
+          <div class="gallery-overlay">
+            <div class="gallery-overlay-content">
+              <div class="gallery-overlay-title">GOPICHANDRA AI</div>
+              <div class="gallery-overlay-sub">Natural language task creation →</div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-caption">
+          <span class="gallery-caption-title">🤖 GOPICHANDRA AI</span>
+          <span class="gallery-caption-tag">AI Chat</span>
+        </div>
+      </div>
+
+      <!-- 3. Party Bomber -->
+      <div class="gallery-item animate-up delay-2" data-cat="features" onclick="openLightbox('Party Bomber 🎉', 'Celebrate your consistency! Completing a task on or before its deadline triggers a screen-wide party of emojis. Success feels better when it\'s celebrated.', 'assets/gallery/party_bomber_real_final_1775501676109.png')">
+        <div class="gallery-screen normal">
+          <img src="assets/gallery/party_bomber_real_final_1775501676109.png" alt="Party Bomber" class="gallery-image">
+          <div class="gallery-overlay">
+            <div class="gallery-overlay-content">
+              <div class="gallery-overlay-title">Party Bomber 🎉</div>
+              <div class="gallery-overlay-sub">Celebrating on-time tasks →</div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-caption">
+          <span class="gallery-caption-title">🎉 Party Bomber</span>
+          <span class="gallery-caption-tag">Gamified</span>
+        </div>
+      </div>
+
+      <!-- 4. Motivation Bomb -->
+      <div class="gallery-item animate-up delay-3" data-cat="features" onclick="openLightbox('Motivation Bomb 💪', 'Missed a task? Don\'t worry. We motivate you to get back on track. Completing overdue tasks triggers a special motivational animation that builds resilience.', 'assets/gallery/sad_bomb_real_final_1775501679058.png')">
+        <div class="gallery-screen normal">
+          <img src="assets/gallery/sad_bomb_real_final_1775501679058.png" alt="Motivation Bomb" class="gallery-image">
+          <div class="gallery-overlay">
+            <div class="gallery-overlay-content">
+              <div class="gallery-overlay-title">Motivation Bomb 💪</div>
+              <div class="gallery-overlay-sub">Build consistency →</div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-caption">
+          <span class="gallery-caption-title">💪 Motivation Bomb</span>
+          <span class="gallery-caption-tag">Resilience</span>
+        </div>
+      </div>
+
+      <!-- 5. Speaker Circle -->
+      <div class="gallery-item animate-up delay-4" data-cat="features" onclick="openLightbox('360° Speaker Circle', 'Instant access to your favorite motivational speakers. This movable, 360-degree floating widget lets you jump into YouTube videos instantly.', '')">
+        <div class="gallery-screen normal">
+          <div class="speaker-360-preview">
+            <div class="s360-inner">
+               <span class="s360-dot d1">🎙️</span>
+               <span class="s360-dot d2">📈</span>
+               <span class="s360-dot d3">💡</span>
+               <span class="s360-dot d4">🔥</span>
+               <div class="s360-fab">✨</div>
+            </div>
+          </div>
+          <div class="gallery-overlay">
+            <div class="gallery-overlay-content">
+              <div class="gallery-overlay-title">Speaker 360🚀</div>
+              <div class="gallery-overlay-sub">Draggable YouTube Portal →</div>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-caption">
+          <span class="gallery-caption-title">🚀 Speaker 360</span>
+          <span class="gallery-caption-tag">Quick Action</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .gallery-image { width: 100%; height: 100%; object-fit: cover; }
+    .speaker-360-preview {
+      width: 100%; height: 100%; background: #f8fafc;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .s360-inner { position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; }
+    .s360-fab { width: 44px; height: 44px; background: #6c63ff; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 2; }
+    .s360-dot { position: absolute; font-size: 14px; background: white; padding: 4px; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .d1 { top: 0; left: 50%; transform: translateX(-50%); }
+    .d2 { bottom: 0; left: 50%; transform: translateX(-50%); }
+    .d3 { left: 0; top: 50%; transform: translateY(-50%); }
+    .d4 { right: 0; top: 50%; transform: translateY(-50%); }
+
+    /* Lightbox enhancements */
+    .lightbox-body { padding: 0 !important; }
+    .lb-media-wrap { width: 100%; aspect-ratio: 16/9; background: #000; display: flex; align-items: center; justify-content: center; }
+    .lb-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .lb-placeholder { color: #64748b; font-size: 14px; }
+    .lb-footer { padding: 20px; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; }
+    .fb-submit { background: #6c63ff; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; transition: 0.2s; }
+    .fb-submit:hover { background: #4f46e5; transform: translateY(-2px); }
+  </style>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <div class="lightbox-content">
+      <div class="lightbox-header">
+        <h3 class="lightbox-title" id="lb-title"></h3>
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+      </div>
+      <div class="lightbox-body">
+        <div id="lb-media-wrap" class="lb-media-wrap"></div>
+        <div style="padding: 20px;">
+          <p class="lightbox-desc" id="lb-desc" style="margin: 0; color: #4b5563; line-height: 1.6;"></p>
+        </div>
+        <div class="lb-footer">
+          <a href="/" class="fb-submit">🚀 Launch Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FOOTER ════════════════════════════════════════════ -->
+  <footer class="p-footer">
+    <div class="p-footer-inner">
+      <div class="p-footer-top">
+        <div class="p-footer-brand">
+          <div class="p-footer-logo-icon">अ</div>
+          <div class="p-footer-brand-text">
+            <span class="p-footer-brand-small">Aapka</span>
+            <span class="p-footer-brand-big">DINACHARYA</span>
+          </div>
+        </div>
+        <div class="p-footer-links">
+          <a href="/" class="p-footer-link">Dashboard</a>
+          <a href="/learn" class="p-footer-link">Learn</a>
+          <a href="/gallery" class="p-footer-link">Gallery</a>
+          <a href="/about" class="p-footer-link">About</a>
+        </div>
+      </div>
+      <div class="p-footer-divider"></div>
+      <div class="p-footer-bottom">
+        <span class="p-footer-copy">© 2026 AapkaDINACHARYA. All rights reserved.</span>
+        <div class="p-footer-socials">
+          <a href="#" class="p-footer-social">GH</a>
+          <a href="#" class="p-footer-social">𝕏</a>
+          <a href="#" class="p-footer-social">in</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile Nav
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('nav-links').classList.toggle('mobile-open');
+    });
+
+    // Lightbox Logic
+    function openLightbox(title, desc, imgSrc) {
+      document.getElementById('lb-title').textContent = title;
+      document.getElementById('lb-desc').textContent = desc;
+      const mediaWrap = document.getElementById('lb-media-wrap');
+      
+      if (imgSrc) {
+        mediaWrap.innerHTML = `<img src="${imgSrc}" class="lb-img">`;
+      } else {
+        mediaWrap.innerHTML = `<div class="lb-placeholder">Preview not available</div>`;
+      }
+      
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      if (!e || e.target.classList.contains('lightbox') || e.target.closest('.lightbox-close')) {
+         document.getElementById('lightbox').classList.remove('open');
+         document.body.style.overflow = '';
+      }
+    }
+
+    // Tabs
+    document.querySelectorAll('.gallery-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelector('.gallery-tab-btn.active').classList.remove('active');
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.gallery-item').forEach(item => {
+          item.style.display = (filter === 'all' || item.dataset.cat === filter) ? 'block' : 'none';
+        });
+      });
+    });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  </script>
+</body>
+</html>

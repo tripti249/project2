@@ -1,0 +1,44 @@
+/* ════════════════════════════════════════════════════════
+   EMOJI PARTICLE SYSTEM
+   ════════════════════════════════════════════════════════ */
+
+#emoji-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.emoji-particle {
+  position: absolute;
+  font-size: 2rem;
+  user-select: none;
+  animation: emoji-fly 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  opacity: 1;
+}
+
+@keyframes emoji-fly {
+  0% {
+    transform: translate(0, 0) scale(0.5) rotate(0deg);
+    opacity: 1;
+  }
+  10% {
+    transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(var(--dr));
+  }
+  100% {
+    transform: translate(var(--dx2), var(--dy2)) scale(0.8) rotate(var(--dr2));
+    opacity: 0;
+  }
+}
+
+/* Success Glow */
+.emoji-particle.success {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+}
+
+/* Fail Desaturation */
+.emoji-particle.fail {
+  filter: grayscale(0.4) drop-shadow(0 0 8px rgba(100, 100, 100, 0.4));
+}

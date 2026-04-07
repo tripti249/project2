@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="AapkaDINACHARYA — your smart personal daily task manager with due dates, AI assistant, and more." />
+  <title>AapkaDINACHARYA — My Tasks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="animations.css" />
+</head>
+
+<body>
+
+  <!-- ══ PROFILE OVERLAY + PANEL ══════════════════════════════ -->
+  <div id="profile-overlay" class="profile-overlay" aria-hidden="true"></div>
+
+  <aside id="profile-panel" class="profile-panel" role="complementary" aria-label="Profile management">
+    <div class="pp-topbar">
+      <h2 class="pp-heading">My Profile</h2>
+      <button id="close-profile-btn" class="pp-close-btn" aria-label="Close profile panel">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Avatar + Info -->
+    <div class="pp-hero">
+      <!-- Clickable avatar with camera overlay -->
+      <div class="pp-avatar-wrap" id="pp-avatar-wrap" title="Click to change photo">
+        <div class="pp-avatar" id="pp-avatar">A</div>
+        <div class="pp-avatar-ring"></div>
+        <div class="pp-avatar-camera" id="pp-avatar-camera">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2"
+            stroke-linecap="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
+          <span>Change Photo</span>
+        </div>
+        <input type="file" id="avatar-upload-input" accept="image/*" hidden />
+      </div>
+
+      <h3 class="pp-name" id="pp-name">Loading…</h3>
+      <p class="pp-email" id="pp-email">…</p>
+      <p class="pp-since" id="pp-since"></p>
+
+      <!-- Photo action buttons -->
+      <div class="pp-photo-actions">
+        <button class="pp-photo-btn upload" id="pp-upload-btn" type="button">
+          <svg viewBox="0 0 20 20" fill="none" width="13" stroke="currentColor" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+              transform="scale(0.7) translate(2,1)" />
+            <circle cx="10" cy="11" r="4" transform="scale(0.7) translate(2,1)" />
+          </svg>
+          Upload Photo
+        </button>
+        <button class="pp-photo-btn remove hidden" id="pp-remove-photo-btn" type="button">
+          <svg viewBox="0 0 20 20" fill="none" width="13" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 17 6" />
+            <path d="M16 6l-1 12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
+          </svg>
+          Remove
+        </button>
+      </div>
+    </div>
+
+    <!-- Task Stats -->
+    <div class="pp-stats-row">
+      <div class="pp-stat-card">
+        <span class="pp-stat-num" id="pp-total">0</span>
+        <span class="pp-stat-lbl">Total</span>
+      </div>
+      <div class="pp-stat-card green">
+        <span class="pp-stat-num" id="pp-done">0</span>
+        <span class="pp-stat-lbl">Done</span>
+      </div>
+      <div class="pp-stat-card blue">
+        <span class="pp-stat-num" id="pp-active">0</span>
+        <span class="pp-stat-lbl">Active</span>
+      </div>
+      <div class="pp-stat-card red">
+        <span class="pp-stat-num" id="pp-overdue">0</span>
+        <span class="pp-stat-lbl">Overdue</span>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="pp-progress-wrap">
+      <div class="pp-progress-label">
+        <span>Completion Rate</span>
+        <span class="pp-progress-pct" id="pp-pct">0%</span>
+      </div>
+      <div class="pp-progress-bar">
+        <div class="pp-progress-fill" id="pp-fill"></div>
+      </div>
+    </div>
+
+    <!-- Edit Profile -->
+    <div class="pp-section">
+      <h4 class="pp-section-title">
+        <svg viewBox="0 0 20 20" fill="none" width="15" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        Edit Profile
+      </h4>
+      <form id="edit-profile-form" class="pp-form">
+        <div class="pp-field">
+          <label for="pp-name-input">Display Name</label>
+          <input type="text" id="pp-name-input" class="pp-input" placeholder="Your full name" maxlength="60" />
+        </div>
+        <div class="pp-field">
+          <label>Email Address</label>
+          <input type="email" class="pp-input disabled" id="pp-email-display" disabled />
+          <span class="pp-hint">Email cannot be changed</span>
+        </div>
+        <button type="submit" class="pp-btn-primary" id="save-profile-btn">
+          <span class="pp-btn-text">Save Changes</span>
+          <div class="pp-btn-spinner hidden"></div>
+        </button>
+        <div class="pp-feedback hidden" id="profile-feedback"></div>
+      </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="pp-section">
+      <h4 class="pp-section-title">
+        <svg viewBox="0 0 20 20" fill="none" width="15" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="14" height="9" rx="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        Change Password
+      </h4>
+      <form id="change-password-form" class="pp-form">
+        <div class="pp-field">
+          <label for="pp-current-pass">Current Password</label>
+          <input type="password" id="pp-current-pass" class="pp-input" placeholder="••••••••" />
+        </div>
+        <div class="pp-field">
+          <label for="pp-new-pass">New Password <span class="pp-hint-inline">(min 6 chars)</span></label>
+          <input type="password" id="pp-new-pass" class="pp-input" placeholder="New password" />
+        </div>
+        <div class="pp-field">
+          <label for="pp-confirm-pass">Confirm New Password</label>
+          <input type="password" id="pp-confirm-pass" class="pp-input" placeholder="Re-type new password" />
+        </div>
+        <button type="submit" class="pp-btn-primary" id="change-pass-btn">
+          <span class="pp-btn-text">Change Password</span>
+          <div class="pp-btn-spinner hidden"></div>
+        </button>
+        <div class="pp-feedback hidden" id="password-feedback"></div>
+      </form>
+    </div>
+
+    <!-- Logout -->
+    <button class="pp-logout-btn" id="pp-logout-btn">
+      <svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+      </svg>
+      Sign Out of AapkaDINACHARYA
+    </button>
+  </aside>
+
+  <!-- ══ NAVBAR ═════════════════════════════════════════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <div class="nav-logo-icon">अ</div>
+        <div class="nav-logo-text">
+          <span class="nav-logo-small">Aapka</span>
+          <span class="nav-logo-big">DINACHARYA</span>
+        </div>
+      </div>
+      <div class="nav-center">
+        <div class="nav-links">
+          <a href="/" class="nav-link active">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Dashboard
+          </a>
+          <a href="/learn" class="nav-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Learn
+          </a>
+          <a href="/gallery" class="nav-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            Gallery
+          </a>
+          <a href="/about" class="nav-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            About
+          </a>
+        </div>
+        <span id="greeting" class="nav-greeting"></span>
+      </div>
+      <div class="nav-right">
+        <!-- Clicking the user card opens profile panel -->
+        <div class="nav-actions">
+          <button class="nav-user-btn" id="open-profile-btn" aria-label="Open profile panel"
+            title="Profile &amp; Settings">
+            <div class="user-avatar" id="user-avatar">A</div>
+            <div class="user-info" id="nav-user-info">
+              <span class="user-name" id="user-name-display">User</span>
+              <span class="user-email" id="user-email-display">user@email.com</span>
+            </div>
+            <svg class="nav-chevron" viewBox="0 0 20 20" fill="none" width="14" stroke="currentColor" stroke-width="2.2">
+              <polyline points="5 8 10 13 15 8" />
+            </svg>
+          </button>
+          
+          <div class="options-container">
+            <button id="options-btn" class="options-btn" aria-label="Options">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+              </svg>
+            </button>
+            <div id="options-dropdown" class="options-dropdown hidden">
+              <div class="opt-header">Quick Actions</div>
+              <button class="opt-item" onclick="triggerEmojiBomb('success')">🎉 Success Party</button>
+              <button class="opt-item" onclick="triggerEmojiBomb('fail')">💪 Motivation Bomb</button>
+              <hr>
+              <button class="opt-item" onclick="document.getElementById('motivation-widget').classList.toggle('open')">🚀 Open Speakers Circle</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══ HERO BANNER ════════════════════════════════════════ -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Get things <span class="hero-accent">done.</span></h1>
+        <p>Stay on top of your tasks, deadlines, and goals — one day at a time.</p>
+      </div>
+      <div class="hero-illustration" aria-hidden="true">
+        <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="banner-svg">
+          <circle cx="260" cy="40" r="60" fill="rgba(255,255,255,0.08)" />
+          <rect x="10" y="30" width="175" height="52" rx="13" fill="rgba(255,255,255,0.15)" />
+          <circle cx="35" cy="56" r="10" fill="rgba(255,255,255,0.25)" />
+          <polyline points="30,56 34,60 41,51" stroke="white" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <rect x="52" y="46" width="110" height="8" rx="4" fill="rgba(255,255,255,0.5)" />
+          <rect x="52" y="60" width="76" height="6" rx="3" fill="rgba(255,255,255,0.25)" />
+          <rect x="10" y="94" width="175" height="52" rx="13" fill="rgba(255,255,255,0.1)" />
+          <circle cx="35" cy="120" r="10" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)"
+            stroke-width="1.5" />
+          <rect x="52" y="111" width="90" height="8" rx="4" fill="rgba(255,255,255,0.35)" />
+          <rect x="52" y="125" width="60" height="6" rx="3" fill="rgba(255,255,255,0.2)" />
+          <rect x="200" y="20" width="110" height="100" rx="14" fill="rgba(255,255,255,0.15)" />
+          <rect x="200" y="20" width="110" height="30" rx="14" fill="rgba(255,255,255,0.2)" />
+          <rect x="200" y="34" width="110" height="16" fill="rgba(255,255,255,0.2)" />
+          <text x="218" y="38" fill="white" font-size="9" font-family="Inter" font-weight="700">April 2026</text>
+          <rect x="208" y="58" width="14" height="14" rx="4" fill="rgba(255,255,255,0.15)" />
+          <rect x="226" y="58" width="14" height="14" rx="4" fill="rgba(255,255,255,0.15)" />
+          <rect x="244" y="58" width="14" height="14" rx="4" fill="rgba(255,255,255,0.5)" />
+          <rect x="262" y="58" width="14" height="14" rx="4" fill="rgba(255,255,255,0.15)" />
+          <rect x="280" y="58" width="14" height="14" rx="4" fill="rgba(255,255,255,0.15)" />
+          <rect x="208" y="78" width="14" height="14" rx="4" fill="rgba(255,255,255,0.15)" />
+          <rect x="226" y="78" width="14" height="14" rx="4" fill="rgba(255,255,255,0.25)" />
+          <rect x="244" y="78" width="14" height="14" rx="4" fill="rgba(255,255,255,0.15)" />
+          <rect x="262" y="78" width="14" height="14" rx="4" fill="rgba(255,255,255,0.15)" />
+          <rect x="280" y="78" width="14" height="14" rx="4" fill="rgba(255,255,255,0.15)" />
+          <rect x="10" y="158" width="300" height="32" rx="10" fill="rgba(255,255,255,0.1)" />
+          <rect x="20" y="168" width="200" height="12" rx="6" fill="rgba(255,255,255,0.15)" />
+          <rect x="20" y="168" width="130" height="12" rx="6" fill="rgba(255,255,255,0.5)" />
+          <text x="228" y="178" fill="white" font-size="9" font-family="Inter" font-weight="700">65%</text>
+        </svg>
+      </div>
+    </div>
+    <div class="banner-stats">
+      <div class="bstat"><span class="bstat-num" id="stat-total">0</span><span class="bstat-lbl">Total</span></div>
+      <div class="bstat-divider"></div>
+      <div class="bstat"><span class="bstat-num accent-blue" id="stat-active">0</span><span
+          class="bstat-lbl">Active</span></div>
+      <div class="bstat-divider"></div>
+      <div class="bstat"><span class="bstat-num accent-green" id="stat-done">0</span><span class="bstat-lbl">Done</span>
+      </div>
+      <div class="bstat-divider"></div>
+      <div class="bstat-progress">
+        <div class="bstat-bar">
+          <div class="bstat-fill" id="progress-fill"></div>
+        </div>
+        <span class="bstat-pct" id="progress-pct">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN ════════════════════════════════════════════════ -->
+  <main class="app-main">
+
+    <section class="add-section" aria-label="Add new task">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg viewBox="0 0 20 20" fill="none" width="18" height="18" stroke="currentColor" stroke-width="2.2">
+            <circle cx="10" cy="10" r="8" />
+            <line x1="10" y1="6" x2="10" y2="14" />
+            <line x1="6" y1="10" x2="14" y2="10" />
+          </svg>
+          Add New Task
+        </h2>
+      </div>
+      <form id="todo-form" autocomplete="off">
+        <div class="input-row">
+          <div class="input-wrap">
+            <svg class="inp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+            <input type="text" id="task-input" class="main-input" placeholder="Aaj kya karna hai?" maxlength="200"
+              aria-label="New task title" required />
+          </div>
+          <button type="submit" id="add-btn" class="add-btn" aria-label="Add task">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add Task
+          </button>
+        </div>
+        <div class="meta-row">
+          <div class="select-group">
+            <label for="task-category" class="meta-label">Category</label>
+            <select id="task-category" class="meta-select">
+              <option value="General">📋 General</option>
+              <option value="Work">💼 Work</option>
+              <option value="Personal">🏠 Personal</option>
+              <option value="Shopping">🛒 Shopping</option>
+              <option value="Health">💪 Health</option>
+              <option value="Learning">📚 Learning</option>
+            </select>
+          </div>
+          <div class="select-group">
+            <label for="task-priority" class="meta-label">Priority</label>
+            <select id="task-priority" class="meta-select">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+          <div class="select-group">
+            <label for="task-start" class="meta-label">Start Date</label>
+            <input type="date" id="task-start" class="meta-select" />
+          </div>
+          <div class="select-group">
+            <label for="task-start-time" class="meta-label">Start Time</label>
+            <input type="time" id="task-start-time" class="meta-select" />
+          </div>
+          <div class="select-group">
+            <label for="task-end" class="meta-label">Due Date</label>
+            <input type="date" id="task-end" class="meta-select" />
+          </div>
+          <div class="select-group">
+            <label for="task-end-time" class="meta-label">Due Time</label>
+            <input type="time" id="task-end-time" class="meta-select" />
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <div class="filter-bar">
+      <div class="filter-group" role="group" aria-label="Filter tasks">
+        <button class="filter-btn active" data-filter="all" id="filter-all">All Tasks</button>
+        <button class="filter-btn" data-filter="active" id="filter-active">Active</button>
+        <button class="filter-btn" data-filter="completed" id="filter-completed">Completed</button>
+        <button class="filter-btn danger" data-filter="overdue" id="filter-overdue">⚠ Overdue</button>
+        <button class="note-btn-main" id="open-notes-btn">📑 NOTE</button>
+      </div>
+      <div class="filter-right">
+        <select class="sort-select" id="sort-select">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="priority">By Priority</option>
+          <option value="duedate">By Due Date</option>
+        </select>
+        <button class="clear-btn" id="clear-completed-btn" title="Clear all completed tasks">
+          <svg viewBox="0 0 20 20" fill="none" width="14" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 17 6" />
+            <path d="M16 6l-1 12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
+            <path d="M8 6V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2" />
+          </svg>
+          Clear Done
+        </button>
+      </div>
+    </div>
+
+    <div class="tasks-container">
+      <ul id="todo-list" class="todo-list" aria-label="Task list" aria-live="polite"></ul>
+      <div id="empty-state" class="empty-state hidden">
+        <div class="empty-illo">
+          <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" width="170">
+            <rect x="30" y="20" width="140" height="120" rx="16" fill="#f0f0ff" stroke="#e0dffe" stroke-width="1.5" />
+            <rect x="50" y="50" width="100" height="12" rx="6" fill="#e0dffe" />
+            <rect x="50" y="72" width="76" height="10" rx="5" fill="#ede9fe" />
+            <rect x="50" y="90" width="60" height="10" rx="5" fill="#ede9fe" />
+            <text x="86" y="140" fill="#6c63ff" font-size="22">🎯</text>
+          </svg>
+        </div>
+        <p class="empty-title" id="empty-title">Koi kaam nahi mila</p>
+        <p class="empty-sub" id="empty-sub">Upar naya task add karo!</p>
+      </div>
+      <div id="loading-state" class="loading-state">
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+        <p>Tasks load ho rahe hain…</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+  <div id="emoji-container"></div>
+
+  <!-- ══ EDIT MODAL ══════════════════════════════════════════ -->
+  <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modal-title" class="modal-title">Edit Task</h2>
+        <button class="modal-close" id="close-modal-btn" aria-label="Close modal">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <form id="edit-form">
+        <input type="hidden" id="edit-id" />
+        <div class="modal-field">
+          <label for="edit-title">Task Title</label>
+          <input type="text" id="edit-title" class="modal-input" maxlength="200" required />
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label for="edit-category">Category</label>
+            <select id="edit-category" class="modal-select">
+              <option value="General">📋 General</option>
+              <option value="Work">💼 Work</option>
+              <option value="Personal">🏠 Personal</option>
+              <option value="Shopping">🛒 Shopping</option>
+              <option value="Health">💪 Health</option>
+              <option value="Learning">📚 Learning</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label for="edit-priority">Priority</label>
+            <select id="edit-priority" class="modal-select">
+              <option value="low">🟢 Low</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label for="edit-start">Start Date</label>
+            <input type="date" id="edit-start" class="modal-select" />
+          </div>
+          <div class="modal-field">
+            <label for="edit-start-time">Start Time</label>
+            <input type="time" id="edit-start-time" class="modal-select" />
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label for="edit-end">Due Date</label>
+            <input type="date" id="edit-end" class="modal-select" />
+          </div>
+          <div class="modal-field">
+            <label for="edit-end-time">Due Time</label>
+            <input type="time" id="edit-end-time" class="modal-select" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancel-edit-btn" class="modal-cancel">Cancel</button>
+          <button type="submit" id="save-edit-btn" class="modal-save">
+            <svg viewBox="0 0 20 20" fill="none" width="14" stroke="currentColor" stroke-width="2.2">
+              <path d="M17 3H7L3 7v10a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z" />
+              <polyline points="15 3 15 8 5 8 5 3" />
+              <polyline points="5 21 5 13h10v8" />
+            </svg>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ AI CHATBOT ══════════════════════════════════════════ -->
+  <!-- FAB Button -->
+  <button class="chatbot-fab" id="chatbot-fab" aria-label="Open GOPICHANDRA AI Assistant"
+    title="Ask GOPICHANDRA — your AI assistant">
+    <div class="chatbot-fab-inner">
+      <svg class="fab-icon-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+      <svg class="fab-icon-close hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        width="22" height="22">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </div>
+    <div class="chatbot-unread" id="chatbot-unread">1</div>
+  </button>
+
+  <!-- Chat Window -->
+  <div class="chatbot-window" id="chatbot-window" aria-label="GOPICHANDRA AI Assistant" role="dialog">
+    <div class="cw-header">
+      <div class="cw-bot-info">
+        <div class="cw-bot-avatar">🤖</div>
+        <div class="cw-bot-text">
+          <span class="cw-bot-name">GOPICHANDRA</span>
+          <span class="cw-bot-status"><span class="cw-status-dot"></span>AI Assistant</span>
+        </div>
+      </div>
+      <div class="cw-header-actions">
+        <button class="cw-icon-btn" id="clear-chat-btn" title="Clear chat" aria-label="Clear chat">
+          <svg viewBox="0 0 20 20" fill="none" width="14" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 17 6" />
+            <path d="M16 6l-1 12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
+          </svg>
+        </button>
+        <button class="cw-icon-btn" id="close-chatbot-btn" title="Close" aria-label="Close chat">
+          <svg viewBox="0 0 24 24" width="16" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="cw-messages" id="cw-messages" aria-live="polite"></div>
+
+    <div class="cw-quick-btns" id="cw-quick-btns">
+      <button class="cw-quick-btn" data-q="How many tasks do I have?">📊 My tasks</button>
+      <button class="cw-quick-btn" data-q="Show my overdue tasks">⚠️ Overdue</button>
+      <button class="cw-quick-btn" data-q="Give me a productivity tip">💡 Tips</button>
+      <button class="cw-quick-btn" data-q="How do I use this app?">❓ Help</button>
+    </div>
+
+    <div class="cw-input-area">
+      <input type="text" id="cw-input" class="cw-input" placeholder="Ask GOPICHANDRA anything…" maxlength="300"
+        aria-label="Chat message" />
+      <button class="cw-send-btn" id="cw-send-btn" aria-label="Send message">
+        <svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ FOOTER ════════════════════════════════════════════ -->
+  <footer class="dashboard-footer">
+    <div class="df-inner">
+      <div class="df-top">
+        <div class="df-brand">
+          <div class="df-logo-icon">अ</div>
+          <div class="df-logo-text">
+            <span class="df-logo-small">Aapka</span>
+            <span class="df-logo-big">DINACHARYA</span>
+          </div>
+        </div>
+        <div class="df-links">
+          <a href="/learn" class="df-link">Educational Materials</a>
+          <a href="/gallery" class="df-link">Project Gallery</a>
+          <a href="/about" class="df-link">About Us</a>
+          <a href="/about#contact" class="df-link">Customer Support</a>
+          <a href="/about#feedback" class="df-link">Feedback</a>
+        </div>
+      </div>
+      <div class="df-divider"></div>
+      <div class="df-bottom">
+        <span class="df-copy">© 2026 AapkaDINACHARYA Technologies. saraipitha shahipur handia, India.</span>
+        <div class="df-socials">
+          <a href="#" class="df-social">GitHub</a>
+          <a href="#" class="df-social">𝕏</a>
+          <a href="#" class="df-social">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Motivation Widget -->
+  <div id="motivation-widget" class="motivation-widget">
+    <div id="motivation-items" class="motivation-items"></div>
+    <button id="motivation-main-btn" class="motivation-main-btn" aria-label="Motivational Speakers">✨</button>
+  </div>
+
+  <!-- ══ NOTES MODAL ══════════════════════════════════════════ -->
+  <div id="notes-modal" class="notes-modal hidden" role="dialog" aria-modal="true" aria-labelledby="notes-title">
+    <div class="notes-card">
+      <div class="notes-sidebar">
+        <div class="ns-header">
+          <h3>My Notes</h3>
+          <button id="new-note-btn" class="ns-new-btn" title="Create New Note">+</button>
+        </div>
+        <div id="notes-list" class="notes-list">
+          <!-- Notes will be loaded here -->
+        </div>
+      </div>
+      
+      <div class="notes-main">
+        <div class="nm-header">
+          <input type="text" id="note-title-input" class="nm-title-input" placeholder="Note Title..." maxlength="50" />
+          <div class="nm-actions">
+            <button id="delete-note-btn" class="nm-delete-btn" title="Delete Note">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+            <button class="notes-close" id="close-notes-btn">✕</button>
+          </div>
+        </div>
+
+        <!-- RTE Toolbar -->
+        <div class="rte-toolbar">
+          <div class="rte-group">
+            <button type="button" class="rte-btn" data-command="bold" title="Bold"><b>B</b></button>
+            <button type="button" class="rte-btn" data-command="italic" title="Italic"><i>I</i></button>
+            <button type="button" class="rte-btn" data-command="underline" title="Underline"><u>U</u></button>
+          </div>
+          <div class="rte-divider"></div>
+          <select id="note-font-family" class="rte-select">
+            <option value="'Inter', sans-serif">English (Modern)</option>
+            <option value="'Noto Sans Devanagari', sans-serif">Hindi (Professional)</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="'Cedarville Cursive', cursive">Cursive Style</option>
+          </select>
+        </div>
+
+        <div id="note-editor" class="note-editor" contenteditable="true" placeholder="Start writing your thoughts here..."></div>
+        
+        <div class="notes-footer">
+          <span id="note-status" class="note-status"></span>
+          <button id="save-note-btn" class="nm-save-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Save Note
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="motivation.js"></script>
+</body>
+
+</html>
