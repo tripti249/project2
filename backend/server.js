@@ -67,7 +67,11 @@ const Note = mongoose.model('Note', noteSchema);
 // ─── Middleware ─────────────────────────────────────────────────
 app.use(cors({ origin: '*' }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+// Resolve frontend path using process.cwd() for better reliability on Render
+const frontendPath = path.join(process.cwd(), 'frontend');
+console.log('📂  Looking for frontend folder in:', frontendPath);
+app.use(express.static(frontendPath));
 
 // ─── Auth Middleware ────────────────────────────────────────────
 function auth(req, res, next) {
@@ -375,11 +379,15 @@ app.get('/api/health', (_req, res) => {
 });
 
 // ─── Page Routes ─────────────────────────────────────────────────
-app.get('/auth',    (_req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'auth.html')));
-app.get('/learn',   (_req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'learn.html')));
-app.get('/gallery', (_req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'gallery.html')));
-app.get('/about',   (_req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'about.html')));
-app.get('*',       (_req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html')));
+app.get('/auth',    (_req, res) => res.sendFile(path.join(frontendPath, 'auth.html')));
+app.get('/learn',   (_req, res) => res.sendFile(path.join(frontendPath, 'learn.html')));
+app.get('/gallery', (_req, res) => res.sendFile(path.join(frontendPath, 'gallery.html')));
+app.get('/about',   (_req, res) => res.sendFile(path.join(frontendPath, 'about.html')));
+app.get('*',        (_req, res) => {
+  const index = path.join(frontendPath, 'index.html');
+  console.log('🌍 Sending file:', index);
+  res.sendFile(index);
+});
 
 // ─── Start ──────────────────────────────────────────────────────
 app.listen(PORT, () => console.log(`\n✅  AapkaDINACHARYA Server → http://localhost:${PORT}\n`));
