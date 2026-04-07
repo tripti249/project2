@@ -13,6 +13,12 @@ const PORT       = process.env.PORT       || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'aapkadinacharya_jwt_secret_2024';
 
 // ─── MongoDB Connection ─────────────────────────────────────────
+if (!process.env.MONGO_URI) {
+  console.log('❌  CRITICAL: MONGO_URI is NOT set in Environment Variables!');
+} else {
+  console.log('✅  MONGO_URI found, attempting connection...');
+}
+
 mongoose.connect(process.env.MONGO_URI, {
   dbName: process.env.DB_NAME || 'aapkadinacharya',
   serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
