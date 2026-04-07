@@ -1,0 +1,16 @@
+{
+  "name": "aapkadincharya-root",
+  "version": "1.0.0",
+  "description": "Root orchestrator for AapkaDINACHARYA deployment",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "cd backend && npm install",
+    "install-backend": "cd backend && npm install",
+    "dev": "cd backend && npm run dev"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Aditya Maurya",
+  "license": "ISC"
+}
