@@ -13,20 +13,23 @@ const PORT       = process.env.PORT       || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'aapkadinacharya_jwt_secret_2024';
 
 // ─── MongoDB Connection ─────────────────────────────────────────
-if (!process.env.MONGO_URI) {
-  console.log('❌  CRITICAL: MONGO_URI is NOT set in Environment Variables!');
+const rawURI = process.env.MONGO_URI || '';
+if (!rawURI) {
+  console.log('❌  CRITICAL: MONGO_URI is missing from Environment Variables!');
 } else {
-  console.log('✅  MONGO_URI found, attempting connection...');
+  // Log a masked version for security: mongodb+srv://Adi***:***@cluster0...
+  const masked = rawURI.replace(/:\/\/([^:]+):([^@]+)@/, '://$1:****@');
+  console.log('✅  MONGO_URI detected:', masked);
 }
 
 mongoose.connect(process.env.MONGO_URI, {
   dbName: process.env.DB_NAME || 'aapkadinacharya',
-  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  serverSelectionTimeoutMS: 5000,
   connectTimeoutMS: 10000,
 })
-  .then(() => console.log('✅  MongoDB Connected to:', process.env.DB_NAME || 'aapkadinacharya'))
+  .then(() => console.log('✅  Successfully Connected to MongoDB Database:', process.env.DB_NAME || 'aapkadinacharya'))
   .catch(err => {
-    console.error('❌  MongoDB Connection Error:', err.message);
+    console.error('❌  MongoDB Connection Error Details:', err.message);
   });
 
 // ─── Mongoose Schemas & Models ─────────────────────────────────
