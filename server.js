@@ -99,7 +99,10 @@ app.post('/api/auth/signup', async (req, res) => {
     const newUser = await User.create({ name: name.trim(), email, password: hashedPwd });
     const token = jwt.sign({ id: newUser._id, email: newUser.email, name: newUser.name }, JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ success: true, token, user: { id: newUser._id, name: newUser.name, email: newUser.email } });
-  } catch (err) { res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (err) {
+    console.error('❌ Signup error:', err.message);
+    res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+  }
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -109,7 +112,10 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password))) return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     const token = jwt.sign({ id: user._id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email } });
-  } catch (err) { res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (err) {
+    console.error('❌ Login error:', err.message);
+    res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+  }
 });
 
 // ─── Protected Routes (Full crud for todos, notes etc) ─────────────
