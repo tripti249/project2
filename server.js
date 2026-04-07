@@ -13,8 +13,10 @@ const PORT       = process.env.PORT       || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'aapkadinacharya_jwt_secret_2024';
 
 // ─── MongoDB Connection ─────────────────────────────────────────
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅  MongoDB Connected'))
+mongoose.connect(process.env.MONGO_URI, {
+  dbName: process.env.DB_NAME || 'aapkadinacharya'
+})
+  .then(() => console.log('✅  MongoDB Connected to:', process.env.DB_NAME || 'aapkadinacharya'))
   .catch(err => {
     console.error('❌  MongoDB Connection Error:', err.message);
     // Removed process.exit(1) to keep the server alive for debugging
