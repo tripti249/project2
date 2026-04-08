@@ -9,7 +9,7 @@
   <title>AapkaDINACHARYA — My Tasks</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="animations.css" />
@@ -19,6 +19,10 @@
 
   <!-- ══ PROFILE OVERLAY + PANEL ══════════════════════════════ -->
   <div id="profile-overlay" class="profile-overlay" aria-hidden="true"></div>
+  <button id="mobile-profile-trigger" class="mobile-profile-trigger" type="button" aria-label="Open profile panel">
+    <span class="mpt-ring" aria-hidden="true"></span>
+    <span class="mpt-core">360</span>
+  </button>
 
   <aside id="profile-panel" class="profile-panel" role="complementary" aria-label="Profile management">
     <div class="pp-topbar">
@@ -102,6 +106,9 @@
         <div class="pp-progress-fill" id="pp-fill"></div>
       </div>
     </div>
+
+    <!-- React Command Center -->
+    <div id="react-profile-tools"></div>
 
     <!-- Edit Profile -->
     <div class="pp-section">
@@ -661,8 +668,11 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="app.js"></script>
   <script src="motivation.js"></script>
+  <script src="react-profile.js"></script>
 </body>
 
 </html>
