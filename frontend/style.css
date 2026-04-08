@@ -1760,6 +1760,96 @@ body::after {
 .hw-shortcut-btn:hover { background: rgba(16, 185, 129, 0.05); border-color: var(--green); transform: translateX(5px); }
 .hw-shortcut-btn .icon { font-size: 1.1rem; }
 
+/* --- Static Meal Plan Display --- */
+.hw-static-plan {
+  display: none;
+  animation: hwFadeIn 0.3s ease;
+}
+.hw-static-plan.active {
+  display: block;
+}
+.hw-plan-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hw-plan-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-3);
+  margin-bottom: 20px;
+  display: block;
+  font-weight: 600;
+}
+.hw-meal-row {
+  background: white;
+  border-left: 3px solid var(--green);
+  padding: 12px 16px;
+  border-radius: 0 16px 16px 0;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.hw-meal-time {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-1);
+  display: block;
+  margin-bottom: 4px;
+}
+.hw-meal-desc {
+  font-size: 0.88rem;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.pro-tag {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--green);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+/* Center Back Button Upgrade */
+.hw-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  width: 100%;
+}
+.hw-back-btn {
+  background: white;
+  border: 1.5px solid rgba(16, 185, 129, 0.2);
+  padding: 12px 30px;
+  border-radius: 14px;
+  color: var(--green);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.06);
+}
+.hw-back-btn:hover {
+  background: var(--green);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+  border-color: var(--green);
+}
+.hw-back-btn::before {
+  content: '←';
+  font-size: 1.1rem;
+}
+
 @media (max-width: 480px) {
   .health-window {
     width: 100%; right: 0; bottom: 0; border-radius: 32px 32px 0 0;
