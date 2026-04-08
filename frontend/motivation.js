@@ -7,8 +7,8 @@
 
 const motivationalSpeakers = [
   { name: 'Sandeep Maheshwari', icon: '\u{1F399}\u{FE0F}', url: 'https://www.youtube.com/@SandeepSeminars' },
-  { name: 'Dr. Vivek Bindra', icon: '\u{1F4C8}', url: 'https://www.youtube.com/@DrVivekBindra' },
-  { name: 'Sonu Sharma', icon: '\u{1F4A1}', url: 'https://www.youtube.com/@sonusharmasocial' },
+  { name: 'Dr. Vivek Bindra', icon: '\u{1F4C8}', url: 'https://www.youtube.com/@MrVivekBindra' },
+  { name: 'Sonu Sharma', icon: '\u{1F4A1}', url: 'https://www.youtube.com/@SONUSHARMAMotivation' },
   { name: 'Harshvardhan Jain', icon: '\u{1F525}', url: 'https://www.youtube.com/@HarshvardhanJain' }
 ];
 
@@ -78,7 +78,7 @@ function initMotivationWidget() {
     const item = document.createElement('a');
     item.href = speaker.url;
     item.target = '_blank';
-    item.rel = 'noreferrer';
+    item.rel = 'noopener noreferrer';
     item.className = 'motivation-item';
     item.title = speaker.name;
     item.innerHTML = `<span>${speaker.icon}</span>`;
