@@ -1295,6 +1295,55 @@ window.ADC_actions = {
   }
 };
 
+function runPendingDashboardShortcut(attempt = 0) {
+  const shortcut = localStorage.getItem('adc_dashboard_shortcut');
+  if (!shortcut) return;
+
+  if (!window.ADC_actions) {
+    if (attempt < 12) {
+      setTimeout(() => runPendingDashboardShortcut(attempt + 1), 180);
+    }
+    return;
+  }
+
+  const actions = window.ADC_actions;
+  localStorage.removeItem('adc_dashboard_shortcut');
+
+  if (shortcut.startsWith('filter:')) {
+    actions.setTaskFilter?.(shortcut.split(':')[1]);
+    return;
+  }
+
+  if (shortcut.startsWith('triggerParty:')) {
+    actions.triggerParty?.(shortcut.split(':')[1] || 'success');
+    return;
+  }
+
+  const actionMap = {
+    openProfile: () => actions.openProfilePanel?.(),
+    openNotes: () => actions.openNotesPanel?.(),
+    openChat: () => actions.openChatPanel?.(),
+    scrollComposer: () => actions.scrollToTaskComposer?.(),
+    clearCompleted: () => actions.clearCompletedTasks?.(),
+    toggleFocus: () => actions.toggleFocusMode?.(),
+    workflowPlan: () => actions.workflowPlan?.(),
+    workflowReview: () => actions.workflowReview?.(),
+    workflowRecover: () => actions.workflowRecover?.(),
+    workflowStudy: () => actions.workflowStudy?.(),
+    workflowCareer: () => actions.workflowCareer?.(),
+    workflowWeekly: () => actions.workflowWeekly?.(),
+    toggleSpeakers: () => actions.toggleSpeakers?.(),
+    exportTasks: () => actions.exportTasksAsJson?.()
+  };
+
+  actionMap[shortcut]?.();
+}
+
+setTimeout(() => runPendingDashboardShortcut(), 450);
+window.addEventListener('load', () => {
+  setTimeout(() => runPendingDashboardShortcut(), 120);
+});
+
 // -- Rich Text Notes System ----------------------------------
 let currentNoteId = null;
 let notesData = [];

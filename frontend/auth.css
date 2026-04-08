@@ -244,11 +244,11 @@ body {
   font-family: inherit; font-size: 0.93rem; font-weight: 600;
   padding: 13px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  box-shadow: 0 4px 16px rgba(108,99,255,0.32);
+  box-shadow: 0 4px 16px rgba(15,118,110,0.24);
   transition: transform var(--t), box-shadow var(--t), opacity var(--t);
   margin-top: 4px;
 }
-.submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 7px 22px rgba(108,99,255,0.38); }
+.submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 7px 22px rgba(15,118,110,0.28); }
 .submit-btn:disabled { opacity: 0.65; cursor: not-allowed; }
 
 .btn-spinner {
@@ -301,4 +301,56 @@ body {
   .auth-left { display: none; }
   .auth-right { min-height: 100vh; }
   .mobile-brand { display: flex; }
+}
+
+/* ========================================================
+   Dashboard Theme Sync
+   ======================================================== */
+:root {
+  --accent: #0f766e;
+  --accent-dark: #0b4d63;
+  --accent-light: #d5f5ef;
+  --accent-glow: rgba(15, 118, 110, 0.18);
+  --text: #0f172a;
+  --text-2: #334155;
+  --text-3: #64748b;
+  --border: #d9e2ec;
+  --bg: #edf2f7;
+  --shadow-md: 0 10px 32px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 22px 54px rgba(15, 23, 42, 0.14);
+}
+
+body {
+  font-family: 'Manrope', -apple-system, sans-serif;
+  background:
+    radial-gradient(900px 500px at -12% -10%, rgba(13, 148, 136, 0.16), rgba(13, 148, 136, 0)),
+    radial-gradient(900px 520px at 112% -12%, rgba(37, 99, 235, 0.16), rgba(37, 99, 235, 0)),
+    var(--bg);
+}
+
+.brand-name-big,
+.form-header h2,
+.hero-text h1 {
+  font-family: 'Sora', 'Manrope', sans-serif;
+}
+
+.auth-left {
+  background: linear-gradient(145deg, #0b4d63 0%, #0f766e 56%, #2563eb 100%);
+}
+
+.auth-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 22px 56px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(217, 226, 236, 0.9);
+  backdrop-filter: blur(12px);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+}
+
+.submit-btn {
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.22);
 }

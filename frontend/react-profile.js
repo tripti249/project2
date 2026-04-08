@@ -24,8 +24,13 @@
     const [status, setStatus] = useState('Command center ready.');
 
     const call = (label, fn) => async () => {
+      if (typeof fn !== 'function') {
+        setStatus(`${label} is not available on this page yet.`);
+        return;
+      }
+
       try {
-        const result = fn ? fn() : null;
+        const result = fn();
         if (result && typeof result.then === 'function') {
           await result;
         }
@@ -45,7 +50,7 @@
       h(
         'p',
         { className: 'rpc-subtitle' },
-        'Linked workflow controls powered by React. Each action is wired to your live app.'
+        'Linked workflow controls powered by React. Each action is wired to the live dashboard or the shared page shell.'
       ),
 
       h(
