@@ -1,7 +1,6 @@
 /* ════════════════════════════════════════════════════════
-   AapkaDINACHARYA — Health Assistant Module
-   - Isolated from main app.js to prevent auth conflicts
-   - Handles BMR, TDEE, and Diet Plan generation
+   AapkaDINACHARYA — Health Assistant Module (Upgraded)
+   - Handles BMR, TDEE, FAQ Hub, and Detailed Macros
    ════════════════════════════════════════════════════════ */
 
 function initHealthAssistant() {
@@ -15,10 +14,10 @@ function initHealthAssistant() {
 
   if (!healthFab) return;
 
+  // Panel Toggling
   healthFab.addEventListener('click', function() {
     if (healthWindow) {
       healthWindow.classList.toggle('hidden');
-      // Close other panels if open
       var chatbotWin = document.getElementById('chatbot-window');
       var notesModal = document.getElementById('notes-modal');
       if (chatbotWin) chatbotWin.classList.add('hidden');
@@ -32,6 +31,53 @@ function initHealthAssistant() {
     });
   }
 
+  // --- Tab System Logic ---
+  var tabs = document.querySelectorAll('.hw-tab');
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var sectionId = tab.getAttribute('data-section');
+      
+      // Update Tab UI
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+
+      // Update Section visibility
+      document.querySelectorAll('.hw-section').forEach(function(sec) {
+        sec.classList.remove('active');
+      });
+      var targetSec = document.getElementById(sectionId);
+      if (targetSec) targetSec.classList.add('active');
+    });
+  });
+
+  // --- Accordion Logic for Protein Hub ---
+  var qaButtons = document.querySelectorAll('.hw-qa-q');
+  qaButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var item = btn.parentElement;
+      var isOpen = item.classList.contains('open');
+      
+      // Close other items
+      document.querySelectorAll('.hw-qa-item').forEach(function(i) {
+        i.classList.remove('open');
+      });
+
+      if (!isOpen) {
+        item.classList.add('open');
+      }
+    });
+  });
+
+  // --- Shortcut Buttons Logic ---
+  var shortcuts = document.querySelectorAll('.hw-shortcut-btn');
+  shortcuts.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var planType = btn.getAttribute('data-plan');
+      handleMealPlanRequest(planType);
+    });
+  });
+
+  // Calculator Logic
   if (hwCalcBtn) {
     hwCalcBtn.addEventListener('click', function() {
       var weight = parseFloat(document.getElementById('hw-weight').value);
@@ -43,8 +89,6 @@ function initHealthAssistant() {
       if (!weight || !height || !age) {
         if (typeof showToast === 'function') {
           showToast('Please enter your weight, height, and age ⚖️', 'info');
-        } else {
-          alert('Please enter your weight, height, and age');
         }
         return;
       }
@@ -63,7 +107,6 @@ function initHealthAssistant() {
 }
 
 function calculateHealthStats(w, h, a, g, act) {
-  // Mifflin-St Jeor Equation
   var bmr = (10 * w) + (6.25 * h) - (5 * a);
   if (g === 'male') bmr += 5;
   else bmr -= 161;
@@ -84,23 +127,33 @@ function displayHealthResults(stats) {
   var foodListEl = document.getElementById('res-foods');
 
   if (dietPlanEl) {
-    dietPlanEl.innerHTML = 'To maintain your weight, consume <strong>' + stats.tdee + '</strong> calories/day. For weight loss, aim for <strong>' + (stats.tdee - 500) + '</strong>. Your daily protein goal is <strong>' + stats.protein + 'g</strong>.';
+    dietPlanEl.innerHTML = 'To maintain your weight, consume <strong>' + stats.tdee + '</strong> kcal/day. For weight loss, aim for <strong>' + (stats.tdee - 500) + '</strong>. Daily protein goal: <strong>' + stats.protein + 'g</strong>.';
   }
 
+  // Nutrition Database (Detailed)
   var foods = [
-    { name: 'Eggs', type: 'Protein' },
-    { name: 'Chicken Breast', type: 'Protein' },
-    { name: 'Paneer/Tofu', type: 'Protein' },
-    { name: 'Lentils/Dal', type: 'Protein' },
-    { name: 'Greek Yogurt', type: 'Protein' },
-    { name: 'Nuts & Seeds', type: 'Calories' },
-    { name: 'Avocados', type: 'Calories' },
-    { name: 'Oats', type: 'Fiber' }
+    { name: 'Chicken Breast', pro: 31, cal: 165, icon: '🍗', type: 'non-veg' },
+    { name: 'Paneer (Cottage)', pro: 18, cal: 265, icon: '🧀', type: 'veg' },
+    { name: 'Eggs (3 large)', pro: 18, cal: 210, icon: '🥚', type: 'non-veg' },
+    { name: 'Soy Chunks', pro: 52, cal: 345, icon: '🌱', type: 'veg' },
+    { name: 'Lentils (Dal)', pro: 9, cal: 116, icon: '🍲', type: 'veg' },
+    { name: 'Fish (Salmon)', pro: 22, cal: 200, icon: '🐟', type: 'non-veg' },
+    { name: 'Chickpeas', pro: 19, cal: 364, icon: '🥣', type: 'veg' },
+    { name: 'Greek Yogurt', pro: 10, cal: 59, icon: '🥛', type: 'veg' }
   ];
 
   if (foodListEl) {
     foodListEl.innerHTML = foods.map(function(f) {
-      return '<span class="hw-food-chip">' + f.name + ' (' + f.type + ')</span>';
+      return '<div class="hw-food-card">' +
+               '<div class="hw-food-head">' +
+                 '<span class="hw-food-icon">' + f.icon + '</span>' +
+                 '<span class="hw-food-name">' + f.name + '</span>' +
+               '</div>' +
+               '<div class="hw-food-macros">' +
+                 '<span>Protein: <span class="macro-val">' + f.pro + 'g</span></span>' +
+                 '<span>Calories: <span class="macro-val">' + f.cal + 'kcal</span></span>' +
+               '</div>' +
+             '</div>';
     }).join('');
   }
 
@@ -110,11 +163,33 @@ function displayHealthResults(stats) {
   if (results) results.classList.remove('hidden');
   
   if (typeof triggerEmojiBomb === 'function') triggerEmojiBomb('success');
-  if (typeof showToast === 'function') showToast('Health plan generated! 🍏', 'success');
+  if (typeof showToast === 'function') showToast('Plan generated! 🍏', 'success');
+}
+
+function handleMealPlanRequest(type) {
+  // Integrate with chatbot or show interactive plan
+  if (typeof showToast === 'function') {
+    showToast('Consulting GOPICHANDRA AI for your ' + type.replace('-', ' ') + '... 🤖', 'info');
+  }
+  
+  // Open chatbot with pre-filled message if applicable
+  var chatbotWin = document.getElementById('chatbot-window');
+  var chatInput = document.getElementById('user-input');
+  var chatSend = document.getElementById('send-button');
+
+  if (chatbotWin && chatInput && chatSend) {
+    setTimeout(function() {
+      document.getElementById('health-window').classList.add('hidden');
+      chatbotWin.classList.remove('hidden');
+      var prompt = "Give me a detailed " + type.replace('-', ' ') + " based on my health requirements.";
+      chatInput.value = prompt;
+      chatSend.click();
+    }, 1500);
+  }
 }
 
 // Auto-run on load
 window.addEventListener('load', function() {
   initHealthAssistant();
-  console.log('Health Assistant initialized');
+  console.log('Health Hub Upgraded Successfully');
 });

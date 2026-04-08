@@ -611,70 +611,199 @@
       <button class="hw-close-btn" id="close-health-btn">✕</button>
     </div>
 
+    <!-- Tab Switching Navigation -->
+    <div class="hw-tabs">
+      <button class="hw-tab active" data-section="hw-calc-section">Calculator</button>
+      <button class="hw-tab" data-section="hw-qa-section">Protein Hub</button>
+    </div>
+
     <div class="hw-content">
-      <div class="hw-form" id="hw-form">
-        <div class="hw-field-group">
-          <div class="hw-field">
-            <label>Weight (kg)</label>
-            <input type="number" id="hw-weight" placeholder="e.g. 70" />
+      <!-- Section 1: Calculator -->
+      <div class="hw-section hw-calc-section active" id="hw-calc-section">
+        <div class="hw-form" id="hw-form">
+          <div class="hw-field-group">
+            <div class="hw-field">
+              <label>Weight (kg)</label>
+              <input type="number" id="hw-weight" placeholder="70" />
+            </div>
+            <div class="hw-field">
+              <label>Height (cm)</label>
+              <input type="number" id="hw-height" placeholder="175" />
+            </div>
+          </div>
+          <div class="hw-field-group">
+            <div class="hw-field">
+              <label>Age</label>
+              <input type="number" id="hw-age" placeholder="25" />
+            </div>
+            <div class="hw-field">
+              <label>Gender</label>
+              <select id="hw-gender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
           </div>
           <div class="hw-field">
-            <label>Height (cm)</label>
-            <input type="number" id="hw-height" placeholder="e.g. 175" />
-          </div>
-        </div>
-        <div class="hw-field-group">
-          <div class="hw-field">
-            <label>Age</label>
-            <input type="number" id="hw-age" placeholder="e.g. 25" />
-          </div>
-          <div class="hw-field">
-            <label>Gender</label>
-            <select id="hw-gender">
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+            <label>Activity Level</label>
+            <select id="hw-activity">
+              <option value="1.2">Sedentary (Little/No exercise)</option>
+              <option value="1.375">Light (1-3 days/week)</option>
+              <option value="1.55">Moderate (3-5 days/week)</option>
+              <option value="1.725">Active (6-7 days/week)</option>
+              <option value="1.9">Very Active (Physical job)</option>
             </select>
           </div>
+          <button id="hw-calc-btn" class="hw-calc-btn">Generate Plan ✨</button>
         </div>
-        <div class="hw-field">
-          <label>Activity Level</label>
-          <select id="hw-activity">
-            <option value="1.2">Sedentary (Little/No exercise)</option>
-            <option value="1.375">Light (1-3 days/week)</option>
-            <option value="1.55">Moderate (3-5 days/week)</option>
-            <option value="1.725">Active (6-7 days/week)</option>
-            <option value="1.9">Very Active (Physical job)</option>
-          </select>
-        </div>
-        <button id="hw-calc-btn" class="hw-calc-btn">Calculate Plan ✨</button>
-      </div>
 
-      <div class="hw-results hidden" id="hw-results">
-        <div class="hw-result-card">
-          <h4>Your Daily Stats</h4>
-          <div class="hw-stats-grid">
-            <div class="hw-stat">
-              <span class="hw-stat-val" id="res-bmr">0</span>
-              <span class="hw-stat-label">BMR (kcal)</span>
-            </div>
-            <div class="hw-stat">
-              <span class="hw-stat-val" id="res-tdee">0</span>
-              <span class="hw-stat-label">TDEE (kcal)</span>
+        <div class="hw-results hidden" id="hw-results">
+          <div class="hw-result-card">
+            <div class="hw-result-header">Daily Metabolism Targets</div>
+            <div class="hw-stats-grid">
+              <div class="hw-stat">
+                <span class="hw-stat-val" id="res-bmr">0</span>
+                <span class="hw-stat-label">BMR (kcal)</span>
+              </div>
+              <div class="hw-stat">
+                <span class="hw-stat-val" id="res-tdee">0</span>
+                <span class="hw-stat-label">TDEE (kcal)</span>
+              </div>
             </div>
           </div>
+
+          <div class="hw-advice-section">
+            <div class="hw-result-header">🎯 Nutrition Strategy</div>
+            <p id="res-diet-plan">Calculating your optimal intake...</p>
+          </div>
+
+          <div class="hw-advice-section">
+            <div class="hw-result-header">💪 Protein-Rich Boosters (per 100g)</div>
+            <div class="hw-food-list" id="res-foods"></div>
+          </div>
+
+          <button class="hw-back-btn" id="hw-back-btn">Update My Details</button>
         </div>
 
-        <div class="hw-advice-section">
-          <h5>🎯 Diet Strategy</h5>
-          <p id="res-diet-plan">Loading...</p>
+        <!-- Meal Plan Shortcuts -->
+        <div class="hw-shortcuts">
+          <button class="hw-shortcut-btn" data-plan="protein-diet">
+            <span>📋 Protein Diet Plan</span>
+            <span class="icon">→</span>
+          </button>
+          <button class="hw-shortcut-btn" data-plan="gym-plan">
+            <span>💪 Gym + Protein Plan</span>
+            <span class="icon">→</span>
+          </button>
+          <button class="hw-shortcut-btn" data-plan="indian-meal">
+            <span>🇮🇳 High-Protein Indian Meal Plan</span>
+            <span class="icon">→</span>
+          </button>
         </div>
+      </div>
 
-        <div class="hw-advice-section">
-          <h5>💪 Nutrient Boosters</h5>
-          <div class="hw-food-list" id="res-foods"></div>
+      <!-- Section 2: Q&A Hub -->
+      <div class="hw-section hw-qa-section" id="hw-qa-section">
+        <div class="hw-qa" id="hw-qa-container">
+          <!-- FAQ Item 1 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ How much protein should I eat daily?</button>
+            <div class="hw-qa-a">It depends on your body weight and activity level.
+
+👉 **Normal person**: ~0.8g per kg body weight
+👉 **Active person**: 1.2–2.0g per kg
+
+**Example**: If you weigh 60 kg → 48–120g protein/day.</div>
+          </div>
+          <!-- FAQ Item 2 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ Best vegetarian protein sources?</button>
+            <div class="hw-qa-a">Top vegetarian sources:
+• Lentils (dal)
+• Chickpeas (chana)
+• Paneer
+• Soybeans / tofu
+• Nuts and seeds
+• Milk & curd</div>
+          </div>
+          <!-- FAQ Item 3 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ Best non-veg protein sources?</button>
+            <div class="hw-qa-a">Top non-veg sources:
+• Eggs (Best & cheapest)
+• Chicken
+• Fish
+• Meat</div>
+          </div>
+          <!-- FAQ Item 4 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ Is protein powder necessary?</button>
+            <div class="hw-qa-a">**No, not necessary.**
+If you can complete your protein from food, you don’t need it. Protein powder is just a supplement, not a replacement.</div>
+          </div>
+          <!-- FAQ Item 5 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ Can I take too much protein?</button>
+            <div class="hw-qa-a">**Yes.** Excess protein may cause:
+• Kidney stress (long-term)
+• Digestion issues
+• Dehydration
+
+Always maintain balance.</div>
+          </div>
+          <!-- FAQ Item 6 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ What if I don’t eat enough protein?</button>
+            <div class="hw-qa-a">Symptoms include:
+• Weak muscles
+• Hair fall
+• Low energy
+• Slow recovery</div>
+          </div>
+          <!-- FAQ Item 7 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ Best time to eat protein?</button>
+            <div class="hw-qa-a">Tips:
+• Spread protein throughout the day.
+• Eat after workout (crucial for muscle recovery).</div>
+          </div>
+          <!-- FAQ Item 8 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ Protein important for weight loss?</button>
+            <div class="hw-qa-a">**Yes!** Protein:
+• Keeps you full longer
+• Reduces cravings
+• Helps maintain muscle during fat loss</div>
+          </div>
+          <!-- FAQ Item 9 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ Can vegetarians build muscle without supplements?</button>
+            <div class="hw-qa-a">**Yes!** Naturally build muscle by eating:
+• Dal + rice
+• Paneer
+• Soy products
+• Nuts</div>
+          </div>
+          <!-- FAQ Item 10 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ How to increase daily protein easily?</button>
+            <div class="hw-qa-a">• Add eggs or paneer to breakfast.
+• Eat dal in every lunch/dinner.
+• Snack on peanuts or roasted chana.
+• Drink milk.</div>
+          </div>
+          <!-- FAQ Item 11 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ Is whey protein safe?</button>
+            <div class="hw-qa-a">**Yes.** Safe for most in the right amount.
+*Note: People with kidney issues should consult a doctor first.*</div>
+          </div>
+          <!-- FAQ Item 12 -->
+          <div class="hw-qa-item">
+            <button class="hw-qa-q">❓ How much protein is in one egg?</button>
+            <div class="hw-qa-a">One egg contains approximately **6 grams** of protein.</div>
+          </div>
         </div>
-
-        <button class="hw-back-btn" id="hw-back-btn">Edit Details</button>
       </div>
     </div>
   </div>
