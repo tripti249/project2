@@ -19,10 +19,6 @@
 
   <!-- ══ PROFILE OVERLAY + PANEL ══════════════════════════════ -->
   <div id="profile-overlay" class="profile-overlay" aria-hidden="true"></div>
-  <button id="mobile-profile-trigger" class="mobile-profile-trigger" type="button" aria-label="Open profile panel">
-    <span class="mpt-ring" aria-hidden="true"></span>
-    <span class="mpt-core">360</span>
-  </button>
 
   <aside id="profile-panel" class="profile-panel" role="complementary" aria-label="Profile management">
     <div class="pp-topbar">
@@ -37,19 +33,30 @@
 
     <!-- Avatar + Info -->
     <div class="pp-hero">
-      <!-- Clickable avatar with camera overlay -->
-      <div class="pp-avatar-wrap" id="pp-avatar-wrap" title="Click to change photo">
-        <div class="pp-avatar" id="pp-avatar">A</div>
-        <div class="pp-avatar-ring"></div>
-        <div class="pp-avatar-camera" id="pp-avatar-camera">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2"
-            stroke-linecap="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-            <circle cx="12" cy="13" r="4" />
-          </svg>
-          <span>Change Photo</span>
+      <div class="pp-hero-top">
+        <!-- Clickable avatar with camera overlay -->
+        <div class="pp-avatar-wrap" id="pp-avatar-wrap" title="Click to change photo">
+          <div class="pp-avatar" id="pp-avatar">A</div>
+          <div class="pp-avatar-ring"></div>
+          <div class="pp-avatar-camera" id="pp-avatar-camera">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+            <span>Change Photo</span>
+          </div>
+          <input type="file" id="avatar-upload-input" accept="image/*" hidden />
         </div>
-        <input type="file" id="avatar-upload-input" accept="image/*" hidden />
+        <button id="profile-clock-btn" class="profile-clock-btn" type="button" aria-label="Current time">
+          <span class="profile-clock-face" aria-hidden="true">
+            <span id="profile-clock-hour" class="profile-clock-hand hour"></span>
+            <span id="profile-clock-minute" class="profile-clock-hand minute"></span>
+            <span id="profile-clock-second" class="profile-clock-hand second"></span>
+            <span class="profile-clock-center"></span>
+          </span>
+          <span id="profile-clock-time" class="profile-clock-time">--:--</span>
+        </button>
       </div>
 
       <h3 class="pp-name" id="pp-name">Loading…</h3>

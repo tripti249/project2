@@ -110,13 +110,18 @@ body {
   display: flex; flex-direction: column; align-items: center;
   padding: 28px 20px 20px;
   background: linear-gradient(160deg, var(--accent) 0%, var(--accent-dark) 100%);
-  gap: 6px;
+  gap: 8px;
+}
+.pp-hero-top {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; width: 100%;
 }
 /* Avatar wrap — clickable to upload photo */
 .pp-avatar-wrap {
   position: relative; margin-bottom: 8px;
   cursor: pointer; flex-shrink: 0;
 }
+.pp-hero-top .pp-avatar-wrap { margin-bottom: 0; }
 .pp-avatar {
   width: 88px; height: 88px; border-radius: 50%;
   background: rgba(255,255,255,0.2);
@@ -174,6 +179,80 @@ body {
   border-color: rgba(239,68,68,0.3);
 }
 .pp-photo-btn.remove:hover { background: rgba(239,68,68,0.3); color: #fff; }
+
+.profile-clock-btn {
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+  min-width: 78px;
+  padding: 10px 12px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  box-shadow: 0 14px 26px rgba(6,78,59,0.2);
+  backdrop-filter: blur(10px);
+  transition: transform var(--t), background var(--t), box-shadow var(--t);
+}
+.profile-clock-btn:hover {
+  background: rgba(255,255,255,0.22);
+  box-shadow: 0 16px 28px rgba(6,78,59,0.24);
+}
+.profile-clock-btn.is-popped,
+.profile-clock-btn:active {
+  transform: scale(1.08);
+}
+.profile-clock-face {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.86);
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.34), rgba(255,255,255,0.08));
+  box-shadow: inset 0 0 0 2px rgba(15,23,42,0.12);
+}
+.profile-clock-hand {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  border-radius: 999px;
+  transform-origin: center bottom;
+}
+.profile-clock-hand.hour {
+  width: 3px;
+  height: 10px;
+  background: #fff;
+}
+.profile-clock-hand.minute {
+  width: 2px;
+  height: 13px;
+  background: rgba(255,255,255,0.96);
+}
+.profile-clock-hand.second {
+  width: 1.5px;
+  height: 15px;
+  background: #fde68a;
+}
+.profile-clock-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+.profile-clock-time {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
 
 .pp-name  { font-size: 1.0rem; font-weight: 700; color: #fff; text-align: center; }
 .pp-email { font-size: 0.78rem; color: rgba(255,255,255,0.72); text-align: center; }
@@ -1482,62 +1561,23 @@ body::after {
   box-shadow: 0 22px 48px rgba(30, 64, 175, 0.24);
 }
 
-/* Mobile left-side 360 profile trigger */
-.mobile-profile-trigger {
-  position: fixed;
-  left: max(10px, env(safe-area-inset-left));
-  top: 58%;
-  transform: translateY(-50%);
-  width: 54px;
-  height: 54px;
-  border: none;
-  border-radius: 50%;
-  background: linear-gradient(140deg, #0f766e, #2563eb);
-  color: #ffffff;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 212;
-  box-shadow: 0 14px 28px rgba(15, 118, 110, 0.35);
-}
-
-.mobile-profile-trigger:hover {
-  transform: translateY(-50%) scale(1.04);
-}
-
-.mpt-ring {
-  position: absolute;
-  inset: 5px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.7);
-  border-top-color: transparent;
-  animation: spin360 2.5s linear infinite;
-}
-
-.mpt-core {
-  position: relative;
-  z-index: 1;
-  font-family: 'Sora', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-}
-
-@keyframes spin360 {
-  to {
-    transform: rotate(360deg);
+@media (max-width: 480px) {
+  .pp-hero-top {
+    gap: 10px;
   }
-}
 
-body.profile-open .mobile-profile-trigger {
-  opacity: 0;
-  pointer-events: none;
-}
+  .profile-clock-btn {
+    min-width: 70px;
+    padding: 9px 10px;
+  }
 
-@media (max-width: 900px) {
-  .mobile-profile-trigger {
-    display: inline-flex;
+  .profile-clock-face {
+    width: 30px;
+    height: 30px;
+  }
+
+  .profile-clock-time {
+    font-size: 0.62rem;
   }
 }
 

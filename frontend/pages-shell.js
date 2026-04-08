@@ -86,10 +86,6 @@
 
   const panelMarkup = `
     <div id="profile-overlay" class="profile-overlay" aria-hidden="true"></div>
-    <button id="mobile-profile-trigger" class="mobile-profile-trigger" type="button" aria-label="Open project command center">
-      <span class="mpt-ring" aria-hidden="true"></span>
-      <span class="mpt-core">360</span>
-    </button>
     <aside id="profile-panel" class="profile-panel" role="complementary" aria-label="Project command center">
       <div class="pp-topbar">
         <h2 class="pp-heading">Command Center</h2>
@@ -102,9 +98,20 @@
       </div>
 
       <div class="pp-hero">
-        <div class="pp-avatar-wrap pp-avatar-wrap-static">
-          <div class="pp-avatar" id="pp-avatar">${getInitial(user.name)}</div>
-          <div class="pp-avatar-ring"></div>
+        <div class="pp-hero-top">
+          <div class="pp-avatar-wrap pp-avatar-wrap-static">
+            <div class="pp-avatar" id="pp-avatar">${getInitial(user.name)}</div>
+            <div class="pp-avatar-ring"></div>
+          </div>
+          <button id="profile-clock-btn" class="profile-clock-btn" type="button" aria-label="Current time">
+            <span class="profile-clock-face" aria-hidden="true">
+              <span id="profile-clock-hour" class="profile-clock-hand hour"></span>
+              <span id="profile-clock-minute" class="profile-clock-hand minute"></span>
+              <span id="profile-clock-second" class="profile-clock-hand second"></span>
+              <span class="profile-clock-center"></span>
+            </span>
+            <span id="profile-clock-time" class="profile-clock-time">--:--</span>
+          </button>
         </div>
         <h3 class="pp-name" id="pp-name">${user.name || "Guest Preview"}</h3>
         <p class="pp-email" id="pp-email">${user.email || "Open the app to unlock full workspace controls."}</p>
@@ -181,7 +188,6 @@
   const profilePanel = document.getElementById("profile-panel");
   const profileOverlay = document.getElementById("profile-overlay");
   const closeProfileBtn = document.getElementById("close-profile-btn");
-  const mobileProfileTrigger = document.getElementById("mobile-profile-trigger");
   const ppAvatar = document.getElementById("pp-avatar");
   const pageUserAvatar = document.getElementById("page-user-avatar");
   const ppOpenAppBtn = document.getElementById("pp-open-app-btn");
@@ -215,10 +221,48 @@
     document.body.classList.remove("profile-open");
   }
 
+  function initProfileClock() {
+    const clockBtn = document.getElementById("profile-clock-btn");
+    const hourHand = document.getElementById("profile-clock-hour");
+    const minuteHand = document.getElementById("profile-clock-minute");
+    const secondHand = document.getElementById("profile-clock-second");
+    const timeLabel = document.getElementById("profile-clock-time");
+
+    if (!clockBtn || !hourHand || !minuteHand || !secondHand || !timeLabel) return;
+
+    let popTimer;
+
+    function updateClock() {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      const minutes = now.getMinutes() + seconds / 60;
+      const hours = (now.getHours() % 12) + minutes / 60;
+
+      hourHand.style.transform = `translateX(-50%) rotate(${hours * 30}deg)`;
+      minuteHand.style.transform = `translateX(-50%) rotate(${minutes * 6}deg)`;
+      secondHand.style.transform = `translateX(-50%) rotate(${seconds * 6}deg)`;
+      timeLabel.textContent = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false });
+    }
+
+    clockBtn.addEventListener("click", () => {
+      clockBtn.classList.remove("is-popped");
+      window.clearTimeout(popTimer);
+      void clockBtn.offsetWidth;
+      clockBtn.classList.add("is-popped");
+      popTimer = window.setTimeout(() => {
+        clockBtn.classList.remove("is-popped");
+      }, 220);
+      updateClock();
+    });
+
+    updateClock();
+    window.setInterval(updateClock, 1000);
+  }
+
   navUserButton.addEventListener("click", openProfile);
   closeProfileBtn.addEventListener("click", closeProfile);
   profileOverlay.addEventListener("click", closeProfile);
-  mobileProfileTrigger.addEventListener("click", openProfile);
+  initProfileClock();
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeProfile();
