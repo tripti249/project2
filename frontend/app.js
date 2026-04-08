@@ -21,6 +21,11 @@ if (!token || !user) {
 let todos = [];
 let filter = 'all';
 let sort = 'newest';
+let addStartTimePicker = null;
+let addEndTimePicker = null;
+let editStartTimePicker = null;
+let editEndTimePicker = null;
+let serviceWorkerRegistrationPromise = null;
 
 // ── DOM — Navbar & Hero ───────────────────────────────────
 const greeting = document.getElementById('greeting');
@@ -40,8 +45,14 @@ const taskCategory = document.getElementById('task-category');
 const taskPriority = document.getElementById('task-priority');
 const taskStart = document.getElementById('task-start');
 const taskStartTime = document.getElementById('task-start-time');
+const taskStartTimeHour = document.getElementById('task-start-time-hour');
+const taskStartTimeMinute = document.getElementById('task-start-time-minute');
+const taskStartTimePeriod = document.getElementById('task-start-time-period');
 const taskEnd = document.getElementById('task-end');
 const taskEndTime = document.getElementById('task-end-time');
+const taskEndTimeHour = document.getElementById('task-end-time-hour');
+const taskEndTimeMinute = document.getElementById('task-end-time-minute');
+const taskEndTimePeriod = document.getElementById('task-end-time-period');
 const addBtn = document.getElementById('add-btn');
 
 // ── DOM — Filters ─────────────────────────────────────────
@@ -64,8 +75,14 @@ const editCategory = document.getElementById('edit-category');
 const editPriority = document.getElementById('edit-priority');
 const editStart = document.getElementById('edit-start');
 const editStartTime = document.getElementById('edit-start-time');
+const editStartTimeHour = document.getElementById('edit-start-time-hour');
+const editStartTimeMinute = document.getElementById('edit-start-time-minute');
+const editStartTimePeriod = document.getElementById('edit-start-time-period');
 const editEnd = document.getElementById('edit-end');
 const editEndTime = document.getElementById('edit-end-time');
+const editEndTimeHour = document.getElementById('edit-end-time-hour');
+const editEndTimeMinute = document.getElementById('edit-end-time-minute');
+const editEndTimePeriod = document.getElementById('edit-end-time-period');
 const cancelEditBtn = document.getElementById('cancel-edit-btn');
 const closeModalBtn = document.getElementById('close-modal-btn');
 
@@ -212,11 +229,10 @@ function fillProfilePanel() {
   const since = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '';
   ppSinceEl.textContent = since ? `Member since ${since}` : '';
 
-  const today = todayStr();
   const total = todos.length;
   const done = todos.filter(t => t.completed).length;
   const active = total - done;
-  const overdue = todos.filter(t => !t.completed && t.endDate && t.endDate < today).length;
+  const overdue = todos.filter((todo) => isTodoOverdue(todo)).length;
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
 
   ppTotalEl.textContent = total;
@@ -341,12 +357,384 @@ async function apiFetch(path, method = 'GET', body = null) {
 // INIT
 // ════════════════════════════════════════════════════════
 (async function init() {
+  initTimePickers();
   taskStart.value = todayStr();
   loadSavedPhoto();
+  await initNotificationSupport();
   await loadTodos();
+  startDeadlineMonitor();
 })();
 
-function todayStr() { return new Date().toISOString().split('T')[0]; }
+function pad2(value) { return String(value).padStart(2, '0'); }
+function todayStr(date = new Date()) { return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`; }
+
+function normalizeTimeInput(value) {
+  if (value == null) return null;
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const match24 = raw.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+  if (match24) {
+    return `${pad2(Number(match24[1]))}:${match24[2]}`;
+  }
+
+  const match12 = raw.match(/^(\d{1,2})(?::([0-5]\d))?\s*(am|pm)$/i);
+  if (!match12) return null;
+
+  let hour = Number(match12[1]);
+  const minute = Number(match12[2] || '0');
+  const period = match12[3].toUpperCase();
+
+  if (hour < 1 || hour > 12) return null;
+
+  if (period === 'AM') hour = hour % 12;
+  if (period === 'PM') hour = (hour % 12) + 12;
+
+  return `${pad2(hour)}:${pad2(minute)}`;
+}
+
+function formatTimeForDisplay(value) {
+  const normalized = normalizeTimeInput(value);
+  if (!normalized) return '';
+
+  const [hour24, minute] = normalized.split(':').map(Number);
+  const hour12 = hour24 % 12 || 12;
+  const period = hour24 >= 12 ? 'PM' : 'AM';
+  return `${hour12}:${pad2(minute)} ${period}`;
+}
+
+function getTimePickerParts(value) {
+  const normalized = normalizeTimeInput(value);
+  if (!normalized) return { hour: '', minute: '', period: '' };
+
+  const [hour24, minute] = normalized.split(':').map(Number);
+  return {
+    hour: String(hour24 % 12 || 12),
+    minute: pad2(minute),
+    period: hour24 >= 12 ? 'PM' : 'AM',
+  };
+}
+
+function populateSelectOptions(select, options, placeholder) {
+  if (!select) return;
+
+  select.innerHTML = '';
+
+  const placeholderOption = document.createElement('option');
+  placeholderOption.value = '';
+  placeholderOption.textContent = placeholder;
+  select.appendChild(placeholderOption);
+
+  options.forEach((option) => {
+    const nextOption = document.createElement('option');
+    nextOption.value = option.value;
+    nextOption.textContent = option.label;
+    select.appendChild(nextOption);
+  });
+}
+
+function createTimePicker(hiddenInput, hourSelect, minuteSelect, periodSelect) {
+  populateSelectOptions(
+    hourSelect,
+    Array.from({ length: 12 }, (_, index) => {
+      const hour = String(index + 1);
+      return { value: hour, label: hour };
+    }),
+    'Hour'
+  );
+  populateSelectOptions(
+    minuteSelect,
+    Array.from({ length: 60 }, (_, index) => {
+      const minute = pad2(index);
+      return { value: minute, label: minute };
+    }),
+    'Min'
+  );
+  populateSelectOptions(
+    periodSelect,
+    [
+      { value: 'AM', label: 'AM' },
+      { value: 'PM', label: 'PM' },
+    ],
+    'AM/PM'
+  );
+
+  function syncHiddenValue() {
+    if (hourSelect.value && minuteSelect.value && periodSelect.value) {
+      // Correctly handle 12 AM/PM
+      let h = parseInt(hourSelect.value);
+      const m = minuteSelect.value;
+      const p = periodSelect.value;
+      
+      if (p === 'AM' && h === 12) h = 0;
+      else if (p === 'PM' && h !== 12) h += 12;
+      
+      hiddenInput.value = `${pad2(h)}:${m}`;
+      return;
+    }
+    hiddenInput.value = '';
+  }
+
+  function setValue(value) {
+    if (!value) {
+      hourSelect.value = '';
+      minuteSelect.value = '';
+      periodSelect.value = '';
+      hiddenInput.value = '';
+      return;
+    }
+    const parts = getTimePickerParts(value);
+    hourSelect.value = parts.hour;
+    minuteSelect.value = parts.minute;
+    periodSelect.value = parts.period;
+    hiddenInput.value = normalizeTimeInput(value) || '';
+  }
+
+  [hourSelect, minuteSelect, periodSelect].forEach((select) => {
+    select.addEventListener('change', syncHiddenValue);
+  });
+
+  setValue(hiddenInput.value);
+
+  return {
+    getValue: () => hiddenInput.value,
+    setValue,
+    clear: () => setValue(''),
+  };
+}
+
+function initTimePickers() {
+  addStartTimePicker = createTimePicker(taskStartTime, taskStartTimeHour, taskStartTimeMinute, taskStartTimePeriod);
+  addEndTimePicker = createTimePicker(taskEndTime, taskEndTimeHour, taskEndTimeMinute, taskEndTimePeriod);
+  editStartTimePicker = createTimePicker(editStartTime, editStartTimeHour, editStartTimeMinute, editStartTimePeriod);
+  editEndTimePicker = createTimePicker(editEndTime, editEndTimeHour, editEndTimeMinute, editEndTimePeriod);
+}
+
+function buildLocalDateTime(dateStr, timeStr, fallbackTime = '00:00') {
+  if (!dateStr) return null;
+
+  const normalized = normalizeTimeInput(timeStr) || fallbackTime;
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const [hour, minute] = normalized.split(':').map(Number);
+  const isEndOfDay = fallbackTime === '23:59' && !normalizeTimeInput(timeStr);
+
+  return new Date(year, month - 1, day, hour, minute, isEndOfDay ? 59 : 0, isEndOfDay ? 999 : 0);
+}
+
+function getTodoStartAt(todo) {
+  return todo.startDate ? buildLocalDateTime(todo.startDate, todo.startTime, '00:00') : null;
+}
+
+function getTodoDeadlineAt(todo) {
+  return todo.endDate ? buildLocalDateTime(todo.endDate, todo.endTime, '23:59') : null;
+}
+
+function isTodoOverdue(todo, reference = new Date()) {
+  if (todo.completed) return false;
+  const deadline = getTodoDeadlineAt(todo);
+  return Boolean(deadline && reference > deadline);
+}
+
+function validateTaskSchedule({ startDate, startTime, endDate, endTime }) {
+  if (startDate && endDate && endDate < startDate) {
+    return 'Due date must be after start date';
+  }
+
+  const normalizedStartTime = normalizeTimeInput(startTime);
+  const normalizedEndTime = normalizeTimeInput(endTime);
+
+  if (startDate && endDate && startDate === endDate && normalizedStartTime && normalizedEndTime) {
+    const startAt = buildLocalDateTime(startDate, normalizedStartTime, '00:00');
+    const endAt = buildLocalDateTime(endDate, normalizedEndTime, '23:59');
+
+    if (endAt < startAt) {
+      return 'Due time must be after start time';
+    }
+  }
+
+  return '';
+}
+
+function normalizeTodo(todo) {
+  if (!todo) return todo;
+
+  return {
+    ...todo,
+    startTime: normalizeTimeInput(todo.startTime),
+    endTime: normalizeTimeInput(todo.endTime),
+  };
+}
+
+function prepareTodoPayload({ title, category, priority, startDate, startTime, endDate, endTime }) {
+  const normalizedStartTime = normalizeTimeInput(startTime);
+  const normalizedEndTime = normalizeTimeInput(endTime);
+  const resolvedStartDate = startDate || (normalizedStartTime ? todayStr() : null);
+  const resolvedEndDate = endDate || (normalizedEndTime ? (resolvedStartDate || todayStr()) : null);
+
+  return {
+    title,
+    category,
+    priority,
+    startDate: resolvedStartDate,
+    startTime: normalizedStartTime,
+    endDate: resolvedEndDate,
+    endTime: normalizedEndTime,
+    timeZoneOffsetMinutes: new Date().getTimezoneOffset(),
+  };
+}
+
+function getDueSortValue(todo) {
+  const deadline = getTodoDeadlineAt(todo);
+  return deadline ? deadline.getTime() : Number.MAX_SAFE_INTEGER;
+}
+
+function describeTodoDeadline(todo) {
+  const dueDateLabel = todo.endDate ? fmtShort(todo.endDate) : '';
+  const dueTimeLabel = formatTimeForDisplay(todo.endTime);
+  return [dueDateLabel, dueTimeLabel].filter(Boolean).join(' ');
+}
+
+function supportsPushNotifications() {
+  return 'serviceWorker' in navigator && 'Notification' in window && 'PushManager' in window;
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
+
+async function ensureServiceWorkerRegistration() {
+  if (!supportsPushNotifications()) return null;
+
+  if (!serviceWorkerRegistrationPromise) {
+    serviceWorkerRegistrationPromise = navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.error('SW registration failed:', err);
+      return null;
+    });
+  }
+
+  return serviceWorkerRegistrationPromise;
+}
+
+async function syncPushSubscription(subscription) {
+  await apiFetch('/notifications/subscribe', 'POST', { subscription });
+}
+
+async function ensurePushSubscription(forcePrompt = false) {
+  if (!supportsPushNotifications()) return null;
+
+  const registration = await ensureServiceWorkerRegistration();
+  if (!registration) return null;
+
+  let permission = Notification.permission;
+
+  if (permission === 'default' && forcePrompt) {
+    permission = await Notification.requestPermission();
+  }
+
+  if (permission !== 'granted') return null;
+
+  const existingSubscription = await registration.pushManager.getSubscription();
+  if (existingSubscription) {
+    await syncPushSubscription(existingSubscription);
+    return existingSubscription;
+  }
+
+  const { publicKey } = await apiFetch('/notifications/vapid-public-key');
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(publicKey),
+  });
+
+  await syncPushSubscription(subscription);
+  return subscription;
+}
+
+async function initNotificationSupport() {
+  if (!supportsPushNotifications()) return;
+
+  try {
+    await ensureServiceWorkerRegistration();
+
+    if (Notification.permission === 'granted') {
+      await ensurePushSubscription(false);
+    }
+  } catch (error) {
+    console.error('Notification setup failed:', error);
+  }
+}
+
+async function showOverdueBrowserNotification(newlyOverdueTodos) {
+  if (!newlyOverdueTodos.length || Notification.permission !== 'granted') return;
+
+  const registration = await ensureServiceWorkerRegistration().catch(() => null);
+  const firstTodo = newlyOverdueTodos[0];
+  const title = newlyOverdueTodos.length === 1 ? 'Task overdue' : `${newlyOverdueTodos.length} tasks overdue`;
+  const body = newlyOverdueTodos.length === 1
+    ? `"${firstTodo.title}" is overdue${describeTodoDeadline(firstTodo) ? ` (due ${describeTodoDeadline(firstTodo)})` : ''}.`
+    : `"${firstTodo.title}" and ${newlyOverdueTodos.length - 1} more tasks are overdue.`;
+  const options = {
+    body,
+    tag: newlyOverdueTodos.length === 1 ? `todo-overdue-${firstTodo.id || firstTodo._id}` : 'todo-overdue-summary',
+    renotify: true,
+    data: { url: '/' },
+  };
+
+  if (registration?.showNotification) {
+    await registration.showNotification(title, options);
+    return;
+  }
+
+  new Notification(title, options);
+}
+
+async function markTodosAsNotified(newlyOverdueTodos, notifiedAt) {
+  await Promise.allSettled(
+    newlyOverdueTodos.map((todo) => apiFetch(`/todos/${todo.id || todo._id}`, 'PATCH', { overdueNotifiedAt: notifiedAt }))
+  );
+}
+
+async function notifyNewlyOverdueTodos() {
+  const newlyOverdueTodos = todos.filter((todo) => isTodoOverdue(todo) && !todo.overdueNotifiedAt);
+  if (!newlyOverdueTodos.length) return;
+
+  const notifiedAt = new Date().toISOString();
+  newlyOverdueTodos.forEach((todo) => {
+    todo.overdueNotifiedAt = notifiedAt;
+  });
+
+  render();
+
+  const firstTodo = newlyOverdueTodos[0];
+  const toastMessage = newlyOverdueTodos.length === 1
+    ? `⚠ "${firstTodo.title}" is overdue now.`
+    : `⚠ ${newlyOverdueTodos.length} tasks are overdue now.`;
+
+  showToast(toastMessage, 'error');
+  await showOverdueBrowserNotification(newlyOverdueTodos);
+  await markTodosAsNotified(newlyOverdueTodos, notifiedAt);
+}
+
+function startDeadlineMonitor() {
+  const refreshDeadlines = async () => {
+    if (!todos.length) return;
+    render();
+    await notifyNewlyOverdueTodos();
+  };
+
+  window.setInterval(() => {
+    refreshDeadlines().catch((error) => console.error('Deadline monitor failed:', error));
+  }, 15000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      refreshDeadlines().catch((error) => console.error('Visibility refresh failed:', error));
+    }
+  });
+}
 
 // ════════════════════════════════════════════════════════
 // TODOS CRUD
@@ -357,9 +745,10 @@ async function loadTodos() {
   todoList.innerHTML = '';
   try {
     const data = await apiFetch('/todos');
-    todos = data.todos;
+    todos = Array.isArray(data.todos) ? data.todos.map(normalizeTodo) : [];
     render();
     dina.updateContext(todos);
+    await notifyNewlyOverdueTodos();
   } catch (err) {
     showToast('⚠ ' + err.message, 'error');
     emptyTitle.textContent = 'Could not load tasks';
@@ -375,13 +764,13 @@ async function addNewTodo(title, options = {}) {
   if (!title) return null;
   
   try {
-    const data = await apiFetch('/todos', 'POST', {
-      title, category, priority, startDate, endDate, startTime, endTime
-    });
-    todos.unshift(data.todo);
+    const payload = prepareTodoPayload({ title, category, priority, startDate, endDate, startTime, endTime });
+    const data = await apiFetch('/todos', 'POST', payload);
+    const todo = normalizeTodo(data.todo);
+    todos.unshift(todo);
     render();
     if (typeof dina !== 'undefined' && dina.updateContext) dina.updateContext(todos);
-    return data.todo;
+    return todo;
   } catch (err) {
     showToast('✗ ' + err.message, 'error');
     return null;
@@ -392,25 +781,35 @@ todoForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const title = taskInput.value.trim();
   if (!title) return;
-  if (taskStart.value && taskEnd.value && taskEnd.value < taskStart.value) {
-    showToast('⚠ Due date must be after start date', 'error'); return;
+  const scheduleError = validateTaskSchedule({
+    startDate: taskStart.value || null,
+    startTime: addStartTimePicker?.getValue() || null,
+    endDate: taskEnd.value || null,
+    endTime: addEndTimePicker?.getValue() || null
+  });
+  if (scheduleError) {
+    showToast(`⚠ ${scheduleError}`, 'error'); return;
   }
+  const pushSubscriptionRequest = (taskEnd.value || addEndTimePicker?.getValue())
+    ? ensurePushSubscription(true).catch((error) => console.error('Push subscription failed:', error))
+    : Promise.resolve(null);
   addBtn.disabled = true;
   const todo = await addNewTodo(title, {
     category: taskCategory.value,
     priority: taskPriority.value,
     startDate: taskStart.value || null,
-    startTime: taskStartTime.value || null,
+    startTime: addStartTimePicker?.getValue() || null,
     endDate: taskEnd.value || null,
-    endTime: taskEndTime.value || null
+    endTime: addEndTimePicker?.getValue() || null
   });
   if (todo) {
     taskInput.value = '';
     taskStart.value = todayStr();
-    taskStartTime.value = '';
+    addStartTimePicker?.clear();
     taskEnd.value = '';
-    taskEndTime.value = '';
+    addEndTimePicker?.clear();
     taskInput.focus();
+    await pushSubscriptionRequest;
     showToast('✓ Task added!', 'success');
   }
   addBtn.disabled = false;
@@ -424,13 +823,13 @@ async function toggleTodo(id) {
   try {
     const data = await apiFetch(`/todos/${id}`, 'PATCH', { completed: newStatus });
     const idx = todos.findIndex(t => (t.id === id || t._id === id));
-    todos[idx] = data.todo;
+    todos[idx] = normalizeTodo(data.todo);
     render();
     dina.updateContext(todos);
 
     // Feedback on completion
     if (newStatus === true) {
-      const onTime = isTaskOnTime(data.todo);
+      const onTime = isTaskOnTime(todos[idx]);
       if (onTime) {
         triggerEmojiBomb('success');
         showToast('Shaandaar! On time khatam kiya! 🚀', 'success');
@@ -480,9 +879,11 @@ function openEdit(id) {
   editCategory.value = t.category;
   editPriority.value = t.priority;
   editStart.value = t.startDate || '';
-  editStartTime.value = t.startTime || '';
+  editStartTime.value = normalizeTimeInput(t.startTime) || '';
+  editStartTimePicker?.setValue(editStartTime.value);
   editEnd.value = t.endDate || '';
-  editEndTime.value = t.endTime || '';
+  editEndTime.value = normalizeTimeInput(t.endTime) || '';
+  editEndTimePicker?.setValue(editEndTime.value);
   editModal.classList.remove('hidden');
   editTitle.focus();
 }
@@ -495,20 +896,32 @@ editForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = editIdInput.value;
   if (!editTitle.value.trim()) return;
-  if (editStart.value && editEnd.value && editEnd.value < editStart.value) {
-    showToast('⚠ Due date must be after start date', 'error'); return;
+  const scheduleError = validateTaskSchedule({
+    startDate: editStart.value || null,
+    startTime: editStartTimePicker?.getValue() || null,
+    endDate: editEnd.value || null,
+    endTime: editEndTimePicker?.getValue() || null
+  });
+  if (scheduleError) {
+    showToast(`⚠ ${scheduleError}`, 'error'); return;
   }
+  const pushSubscriptionRequest = (editEnd.value || editEndTimePicker?.getValue())
+    ? ensurePushSubscription(true).catch((error) => console.error('Push subscription failed:', error))
+    : Promise.resolve(null);
   try {
-    const data = await apiFetch(`/todos/${id}`, 'PATCH', {
-      title: editTitle.value.trim(), category: editCategory.value,
-      priority: editPriority.value, startDate: editStart.value || null,
-      startTime: editStartTime.value || null,
+    const data = await apiFetch(`/todos/${id}`, 'PATCH', prepareTodoPayload({
+      title: editTitle.value.trim(),
+      category: editCategory.value,
+      priority: editPriority.value,
+      startDate: editStart.value || null,
+      startTime: editStartTimePicker?.getValue() || null,
       endDate: editEnd.value || null,
-      endTime: editEndTime.value || null
-    });
+      endTime: editEndTimePicker?.getValue() || null
+    }));
     const idx = todos.findIndex(t => (t.id === id || t._id === id));
-    todos[idx] = data.todo;
+    todos[idx] = normalizeTodo(data.todo);
     closeEdit();
+    await pushSubscriptionRequest;
     render();
     dina.updateContext(todos);
     showToast('✓ Task updated!', 'success');
@@ -541,11 +954,10 @@ function render() {
 }
 
 function getFiltered() {
-  const today = todayStr();
   switch (filter) {
     case 'active': return todos.filter(t => !t.completed);
     case 'completed': return todos.filter(t => t.completed);
-    case 'overdue': return todos.filter(t => !t.completed && t.endDate && t.endDate < today);
+    case 'overdue': return todos.filter((todo) => isTodoOverdue(todo));
     default: return [...todos];
   }
 }
@@ -556,9 +968,7 @@ function getSorted(list) {
     case 'oldest': return copy.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     case 'priority': return copy.sort((a, b) => pri[a.priority] - pri[b.priority]);
     case 'duedate': return copy.sort((a, b) => {
-      if (!a.endDate && !b.endDate) return 0;
-      if (!a.endDate) return 1; if (!b.endDate) return -1;
-      return a.endDate.localeCompare(b.endDate);
+      return getDueSortValue(a) - getDueSortValue(b);
     });
     default: return copy.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
@@ -606,7 +1016,6 @@ function buildTodoEl(todo) {
 
 function buildDueBadge(todo) {
   if (!todo.endDate && !todo.startTime && !todo.endTime) return '';
-  const today = todayStr();
   const start = todo.startDate ? fmtShort(todo.startDate) : null;
   const end = todo.endDate ? fmtShort(todo.endDate) : null;
   
@@ -617,7 +1026,9 @@ function buildDueBadge(todo) {
 
   let timeRange = '';
   if (todo.startTime || todo.endTime) {
-    timeRange = `${todo.startTime || ''}${todo.endTime ? ' - ' + todo.endTime : ''}`;
+    const startLabel = formatTimeForDisplay(todo.startTime);
+    const endLabel = formatTimeForDisplay(todo.endTime);
+    timeRange = `${startLabel || ''}${endLabel ? ` - ${endLabel}` : ''}`.trim();
   }
 
   let fullDisplay = range;
@@ -629,8 +1040,12 @@ function buildDueBadge(todo) {
 
   let cls;
   if (todo.completed) cls = 'done';
-  else if (todo.endDate && todo.endDate < today) cls = 'overdue';
-  else if (todo.endDate) { const d = dateDiff(today, todo.endDate); cls = d <= 3 ? 'due-soon' : 'upcoming'; }
+  else if (isTodoOverdue(todo)) cls = 'overdue';
+  else if (todo.endDate) {
+    const deadline = getTodoDeadlineAt(todo);
+    const msRemaining = deadline ? deadline.getTime() - Date.now() : Number.MAX_SAFE_INTEGER;
+    cls = msRemaining <= 3 * 86400000 ? 'due-soon' : 'upcoming';
+  }
   else cls = 'upcoming';
 
   const icon = { done: '✓', overdue: '⚠', 'due-soon': '⏰', upcoming: '📅' }[cls] || '📅';
@@ -703,16 +1118,8 @@ function fmtShort(str) {
 function dateDiff(from, to) { return Math.round((new Date(to) - new Date(from)) / 86400000); }
 
 function isTaskOnTime(todo) {
-  if (!todo.endDate) return true;
-  const now = new Date();
-  const today = todayStr();
-  if (today < todo.endDate) return true;
-  if (today > todo.endDate) return false;
-  if (!todo.endTime) return true;
-  const [h, m] = todo.endTime.split(':');
-  const deadline = new Date();
-  deadline.setHours(parseInt(h), parseInt(m), 59, 999);
-  return now <= deadline;
+  const deadline = getTodoDeadlineAt(todo);
+  return !deadline || new Date() <= deadline;
 }
 
 function svgEdit() { return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`; }
@@ -978,14 +1385,14 @@ const GopiBot = {
   _taskSummary(name) {
     const t = this._todos.length;
     const d = this._todos.filter(x => x.completed).length;
-    const o = this._todos.filter(x => !x.completed && x.endDate && x.endDate < todayStr()).length;
+    const o = this._todos.filter((todo) => isTodoOverdue(todo)).length;
     const p = t === 0 ? 0 : Math.round((d / t) * 100);
     if (t === 0) return `${name}, abhi koi task nahi hai! ✨ Naya task add karke start karo.`;
     return `📊 **Status Report:**\nTotal: **${t}** | Done: **${d}** | Pending: **${t-d}**\n⚠️ Overdue: **${o}**\n📈 Progress: **${p}%**\n\n${p>=75?'Mast kaam kar rahe ho!':'Lage raho dost!'} 🚀`;
   },
 
   _overdueInfo(name) {
-    const ov = this._todos.filter(x => !x.completed && x.endDate && x.endDate < todayStr());
+    const ov = this._todos.filter((todo) => isTodoOverdue(todo));
     if (ov.length === 0) return `${name}, koi overdue task nahi hai! ✅ Good job!`;
     const list = ov.slice(0, 3).map(x => "• " + x.title).join('\n');
     return `⚠️ **Overdue Alert!**\n${ov.length} tasks late hain:\n${list}\n\nInhe pehle finish karo! 🔥`;
@@ -1005,9 +1412,10 @@ const GopiBot = {
   },
 
   _upcomingInfo(name) {
-    const today = todayStr();
-    const up = this._todos.filter(x => !x.completed && x.endDate && x.endDate >= today)
-      .sort((a,b) => a.endDate.localeCompare(b.endDate)).slice(0, 3);
+    const up = this._todos
+      .filter((todo) => !todo.completed && todo.endDate && !isTodoOverdue(todo))
+      .sort((a, b) => getDueSortValue(a) - getDueSortValue(b))
+      .slice(0, 3);
     if (up.length === 0) return `Aage ki list khali hai. 📅`;
     return `📅 **Upcoming:**\n${up.map(x => "• " + x.title).join('\n')}\n\nTayyari rakho! 🚀`;
   },
@@ -1131,10 +1539,15 @@ async function sendMessage(msg) {
       });
       if (todo) {
         let timeMsg = "";
-        if (resp.startTime || resp.endTime) {
-          timeMsg = ` (${resp.startTime || ''}${resp.endTime ? ' to ' + resp.endTime : ''})`;
+        const startLabel = formatTimeForDisplay(todo.startTime);
+        const endLabel = formatTimeForDisplay(todo.endTime);
+        if (startLabel || endLabel) {
+          timeMsg = ` (${startLabel || ''}${endLabel ? ` to ${endLabel}` : ''})`;
         }
         addBotMsg(`Theek hai! Maine **"${resp.title}"**${timeMsg} aapki list mein add kar diya hai. ✅`);
+        if (todo.endDate || todo.endTime) {
+          await ensurePushSubscription(true).catch((error) => console.error('Push subscription failed:', error));
+        }
         showToast('✓ Task added via Chat!', 'success');
       } else {
         addBotMsg("Maaf kijiye, main task add nahi kar paaya. ❌");

@@ -227,6 +227,47 @@
     goTo("/auth", "Auth page is already open.");
   });
 
+  function normalizeTimeInput(value) {
+    if (value == null) return null;
+
+    const raw = String(value).trim();
+    if (!raw) return null;
+
+    const match24 = raw.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+    if (match24) {
+      return `${String(Number(match24[1])).padStart(2, "0")}:${match24[2]}`;
+    }
+
+    const match12 = raw.match(/^(\d{1,2})(?::([0-5]\d))?\s*(am|pm)$/i);
+    if (!match12) return null;
+
+    let hour = Number(match12[1]);
+    const minute = Number(match12[2] || "0");
+    if (hour < 1 || hour > 12) return null;
+
+    if (match12[3].toUpperCase() === "AM") hour = hour % 12;
+    if (match12[3].toUpperCase() === "PM") hour = (hour % 12) + 12;
+
+    return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  }
+
+  function buildLocalDateTime(dateValue, timeValue, fallbackTime) {
+    if (!dateValue) return null;
+
+    const normalized = normalizeTimeInput(timeValue) || fallbackTime;
+    const [year, month, day] = dateValue.split("-").map(Number);
+    const [hour, minute] = normalized.split(":").map(Number);
+    const endOfDay = fallbackTime === "23:59" && !normalizeTimeInput(timeValue);
+
+    return new Date(year, month - 1, day, hour, minute, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+  }
+
+  function isTodoOverdue(todo) {
+    if (todo.completed || !todo.endDate) return false;
+    const deadline = buildLocalDateTime(todo.endDate, todo.endTime, "23:59");
+    return Boolean(deadline && new Date() > deadline);
+  }
+
   async function loadStats() {
     if (!token) return;
 
@@ -240,11 +281,10 @@
       if (!response.ok) return;
       const data = await response.json();
       const todos = Array.isArray(data.todos) ? data.todos : [];
-      const today = new Date().toISOString().split("T")[0];
       const total = todos.length;
       const done = todos.filter((todo) => todo.completed).length;
       const active = total - done;
-      const overdue = todos.filter((todo) => !todo.completed && todo.endDate && todo.endDate < today).length;
+      const overdue = todos.filter((todo) => isTodoOverdue(todo)).length;
       const pct = total === 0 ? 0 : Math.round((done / total) * 100);
 
       document.getElementById("pp-total").textContent = total;

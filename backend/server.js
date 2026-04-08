@@ -7,6 +7,7 @@ const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
 const mongoose   = require('mongoose');
 const path       = require('path');
+const webpush    = require('web-push');
 
 const app        = express();
 const PORT       = process.env.PORT       || 5000;
@@ -19,6 +20,13 @@ mongoose.connect(process.env.MONGO_URI)
     console.error('❌  MongoDB Connection Error:', err.message);
     process.exit(1);
   });
+
+// ─── Configure Web Push ─────────────────────────────────────────
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT || 'mailto:example@gmail.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 // ─── Mongoose Schemas & Models ─────────────────────────────────
 const userSchema = new mongoose.Schema({
@@ -37,14 +45,28 @@ const todoSchema = new mongoose.Schema({
   startTime: { type: String, default: null },
   endTime:   { type: String, default: null },
   completed: { type: Boolean, default: false },
+  overdueNotifiedAt: { type: Date, default: null }, // Track when user was notified
 }, { 
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
+const pushSubscriptionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  subscription: {
+    endpoint: { type: String, required: true },
+    expirationTime: { type: Number, default: null },
+    keys: {
+      p256dh: { type: String, required: true },
+      auth: { type: String, required: true },
+    },
+  },
+}, { timestamps: true });
+
 const User = mongoose.model('User', userSchema);
 const Todo = mongoose.model('Todo', todoSchema);
+const PushSubscription = mongoose.model('PushSubscription', pushSubscriptionSchema);
 
 const feedbackSchema = new mongoose.Schema({
   name:     { type: String, trim: true },
@@ -367,6 +389,86 @@ app.post('/api/feedback', async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error. Please try again.' });
   }
 });
+
+// ─── NOTIFICATION ROUTES ────────────────────────────────────────
+
+app.get('/api/notifications/vapid-public-key', (req, res) => {
+  res.json({ publicKey: process.env.VAPID_PUBLIC_KEY });
+});
+
+app.post('/api/notifications/subscribe', auth, async (req, res) => {
+  try {
+    const { subscription } = req.body;
+    if (!subscription || !subscription.endpoint) {
+      return res.status(400).json({ success: false, message: 'Invalid subscription.' });
+    }
+
+    // Upsert the subscription for the user
+    await PushSubscription.findOneAndUpdate(
+      { userId: req.user.id, 'subscription.endpoint': subscription.endpoint },
+      { userId: req.user.id, subscription },
+      { upsert: true, new: true }
+    );
+
+    res.status(201).json({ success: true, message: 'Subscribed successfully.' });
+  } catch (err) {
+    console.error('Subscribe error:', err.message);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+// ─── BACKGROUND OVERDUE CHECKER ─────────────────────────────────
+
+async function checkOverdueTasks() {
+  try {
+    const now = new Date();
+    // Find todos that are not completed and haven't been notified
+    const activeTodos = await Todo.find({ completed: false, overdueNotifiedAt: null });
+    
+    for (const todo of activeTodos) {
+      if (!todo.endDate) continue;
+      
+      const [year, month, day] = todo.endDate.split('-').map(Number);
+      let hour = 23, minute = 59;
+      if (todo.endTime) {
+        const [h, m] = todo.endTime.split(':').map(Number);
+        hour = h;
+        minute = m;
+      }
+      
+      const deadline = new Date(year, month - 1, day, hour, minute, 59, 999);
+      
+      if (now > deadline) {
+        const subscriptions = await PushSubscription.find({ userId: todo.userId });
+        
+        for (const sub of subscriptions) {
+          const payload = JSON.stringify({
+            title: 'Task Overdue! ⚠',
+            body: `"${todo.title}" was due at ${todo.endTime || '23:59'} today.`,
+            data: { url: '/' }
+          });
+          
+          try {
+            await webpush.sendNotification(sub.subscription, payload);
+          } catch (err) {
+            if (err.statusCode === 404 || err.statusCode === 410) {
+              await PushSubscription.findByIdAndDelete(sub._id);
+            }
+          }
+        }
+        
+        todo.overdueNotifiedAt = now;
+        await todo.save();
+        console.log(`📢 Notification sent for overdue task: ${todo.title}`);
+      }
+    }
+  } catch (err) {
+    console.error('Background checker error:', err);
+  }
+}
+
+setInterval(checkOverdueTasks, 60000);
+setTimeout(checkOverdueTasks, 5000);
 
 // ─── Health ─────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

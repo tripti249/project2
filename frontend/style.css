@@ -485,6 +485,28 @@ body {
 input[type="date"].meta-select { background-image: none; padding-right: 10px; }
 .meta-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
+.time-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-picker-select {
+  min-width: 0;
+  flex: 1 1 0;
+}
+
+.time-picker-select.period {
+  flex: 0.9 0.9 0;
+}
+
+.time-picker-sep {
+  color: var(--text-3);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .add-btn {
   display: flex; align-items: center; gap: 7px;
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
@@ -689,6 +711,7 @@ input[type="date"].meta-select { background-image: none; padding-right: 10px; }
   transition:border-color var(--t), box-shadow var(--t);
 }
 .modal-input:focus, .modal-select:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); background:#fff; }
+.modal-time-picker { width: 100%; }
 .modal-row { display:flex; gap:14px; }
 .modal-row .modal-field { flex:1; }
 .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
@@ -885,6 +908,7 @@ input[type="date"].meta-select { background-image: none; padding-right: 10px; }
   .user-info { display: none; }
   .todo-actions { opacity: 1; }
   .modal-row { flex-direction: column; }
+  .time-picker-group { width: 100%; }
   .chatbot-window { width: calc(100vw - 32px); right: 16px; bottom: 90px; }
   .chatbot-fab { right: 16px; bottom: 20px; }
   .profile-panel { width: min(var(--pp-width), 90vw); }

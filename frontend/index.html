@@ -357,7 +357,13 @@
           </div>
           <div class="select-group">
             <label for="task-start-time" class="meta-label">Start Time</label>
-            <input type="time" id="task-start-time" class="meta-select" />
+            <div class="time-picker-group">
+              <select id="task-start-time-hour" class="meta-select time-picker-select" aria-label="Start hour"></select>
+              <span class="time-picker-sep">:</span>
+              <select id="task-start-time-minute" class="meta-select time-picker-select" aria-label="Start minute"></select>
+              <select id="task-start-time-period" class="meta-select time-picker-select period" aria-label="Start AM PM"></select>
+              <input type="hidden" id="task-start-time" />
+            </div>
           </div>
           <div class="select-group">
             <label for="task-end" class="meta-label">Due Date</label>
@@ -365,7 +371,13 @@
           </div>
           <div class="select-group">
             <label for="task-end-time" class="meta-label">Due Time</label>
-            <input type="time" id="task-end-time" class="meta-select" />
+            <div class="time-picker-group">
+              <select id="task-end-time-hour" class="meta-select time-picker-select" aria-label="Due hour"></select>
+              <span class="time-picker-sep">:</span>
+              <select id="task-end-time-minute" class="meta-select time-picker-select" aria-label="Due minute"></select>
+              <select id="task-end-time-period" class="meta-select time-picker-select period" aria-label="Due AM PM"></select>
+              <input type="hidden" id="task-end-time" />
+            </div>
           </div>
         </div>
       </form>
@@ -470,7 +482,13 @@
           </div>
           <div class="modal-field">
             <label for="edit-start-time">Start Time</label>
-            <input type="time" id="edit-start-time" class="modal-select" />
+            <div class="time-picker-group modal-time-picker">
+              <select id="edit-start-time-hour" class="modal-select time-picker-select" aria-label="Edit start hour"></select>
+              <span class="time-picker-sep">:</span>
+              <select id="edit-start-time-minute" class="modal-select time-picker-select" aria-label="Edit start minute"></select>
+              <select id="edit-start-time-period" class="modal-select time-picker-select period" aria-label="Edit start AM PM"></select>
+              <input type="hidden" id="edit-start-time" />
+            </div>
           </div>
         </div>
         <div class="modal-row">
@@ -480,7 +498,13 @@
           </div>
           <div class="modal-field">
             <label for="edit-end-time">Due Time</label>
-            <input type="time" id="edit-end-time" class="modal-select" />
+            <div class="time-picker-group modal-time-picker">
+              <select id="edit-end-time-hour" class="modal-select time-picker-select" aria-label="Edit due hour"></select>
+              <span class="time-picker-sep">:</span>
+              <select id="edit-end-time-minute" class="modal-select time-picker-select" aria-label="Edit due minute"></select>
+              <select id="edit-end-time-period" class="modal-select time-picker-select period" aria-label="Edit due AM PM"></select>
+              <input type="hidden" id="edit-end-time" />
+            </div>
           </div>
         </div>
         <div class="modal-actions">
