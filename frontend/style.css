@@ -1512,8 +1512,8 @@ body::after {
    ════════════════════════════════════════════════════════ */
 .health-fab {
   position: fixed;
-  bottom: 85px; /* Above chatbot fab */
-  right: 20px;
+  bottom: 20px;
+  right: 85px; 
   width: 52px;
   height: 52px;
   border-radius: 50%;
@@ -1522,7 +1522,7 @@ body::after {
   color: var(--green);
   box-shadow: 0 8px 32px rgba(16, 185, 129, 0.25);
   cursor: pointer;
-  z-index: 999;
+  z-index: 1100;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   align-items: center;
