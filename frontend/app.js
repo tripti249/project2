@@ -194,49 +194,10 @@ function closeProfile() {
   document.body.style.overflow = '';
 }
 
-function initProfileClock() {
-  const clockBtn = document.getElementById('profile-clock-btn');
-  const hourHand = document.getElementById('profile-clock-hour');
-  const minuteHand = document.getElementById('profile-clock-minute');
-  const secondHand = document.getElementById('profile-clock-second');
-  const timeLabel = document.getElementById('profile-clock-time');
-
-  if (!clockBtn || !hourHand || !minuteHand || !secondHand || !timeLabel) return;
-
-  let popTimer;
-
-  function updateClock() {
-    const now = new Date();
-    const seconds = now.getSeconds();
-    const minutes = now.getMinutes() + seconds / 60;
-    const hours = (now.getHours() % 12) + minutes / 60;
-
-    hourHand.style.transform = `translateX(-50%) rotate(${hours * 30}deg)`;
-    minuteHand.style.transform = `translateX(-50%) rotate(${minutes * 6}deg)`;
-    secondHand.style.transform = `translateX(-50%) rotate(${seconds * 6}deg)`;
-    timeLabel.textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
-  }
-
-  clockBtn.addEventListener('click', () => {
-    clockBtn.classList.remove('is-popped');
-    window.clearTimeout(popTimer);
-    void clockBtn.offsetWidth;
-    clockBtn.classList.add('is-popped');
-    popTimer = window.setTimeout(() => {
-      clockBtn.classList.remove('is-popped');
-    }, 220);
-    updateClock();
-  });
-
-  updateClock();
-  window.setInterval(updateClock, 1000);
-}
-
 openProfileBtn.addEventListener('click', openProfile);
 closeProfileBtn.addEventListener('click', closeProfile);
 profileOverlay.addEventListener('click', closeProfile);
 ppLogoutBtn.addEventListener('click', logout);
-initProfileClock();
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeProfile(); closeEdit(); } });
 
@@ -878,8 +839,8 @@ const GopiBot = {
     if (/(notes|note kaise|open notes|rich text)/.test(msg)) {
       return { type: 'text', content: 'Filter bar mein NOTE button se notes modal khulta hai. Wahan formatting, save aur delete sab available hai.' };
     }
-    if (/(profile|change name|change password|avatar|photo|sidebar|slide bar|clock)/.test(msg)) {
-      return { type: 'text', content: 'Top-right user card se profile panel open karo. Wahan name update, password change, photo upload/remove, live clock aur progress stats milenge.' };
+    if (/(profile|change name|change password|avatar|photo|sidebar|slide bar)/.test(msg)) {
+      return { type: 'text', content: 'Top-right user card se profile panel open karo. Wahan name update, password change, photo upload/remove aur progress stats milenge.' };
     }
 
     // Plan builders
