@@ -888,6 +888,7 @@ input[type="date"].meta-select { background-image: none; padding-right: 10px; }
   .chatbot-window { width: calc(100vw - 32px); right: 16px; bottom: 90px; }
   .chatbot-fab { right: 16px; bottom: 20px; }
   .profile-panel { width: min(var(--pp-width), 90vw); }
+  .motivation-widget { left: 16px; right: auto; bottom: 20px; }
 }
 @media (max-width: 480px) {
   .nav-inner   { padding: 0 14px; }
@@ -1072,6 +1073,7 @@ input[type="date"].meta-select { background-image: none; padding-right: 10px; }
   box-shadow: 0 8px 16px rgba(108, 99, 255, 0.3);
   z-index: 2;
   transition: all 0.3s;
+  touch-action: none;
 }
 
 .motivation-main-btn:active {

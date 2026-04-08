@@ -655,6 +655,39 @@ function showToast(msg, type = 'success') {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
+function createEmojiParticleSystem(emojis, variant = 'success') {
+  const container = document.getElementById('emoji-container');
+  if (!container || !Array.isArray(emojis) || !emojis.length) return;
+
+  const particleCount = 28;
+  const originX = window.innerWidth / 2;
+  const originY = Math.max(120, window.innerHeight * 0.28);
+
+  for (let i = 0; i < particleCount; i += 1) {
+    const particle = document.createElement('span');
+    const angle = ((Math.PI * 2) / particleCount) * i + ((Math.random() - 0.5) * 0.35);
+    const midDistance = 60 + Math.random() * 50;
+    const endDistance = 140 + Math.random() * 170;
+    const lift = 50 + Math.random() * 140;
+
+    particle.className = `emoji-particle ${variant}`;
+    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    particle.style.left = `${originX}px`;
+    particle.style.top = `${originY}px`;
+    particle.style.fontSize = `${1.4 + Math.random() * 1.2}rem`;
+    particle.style.setProperty('--dx', `${Math.cos(angle) * midDistance}px`);
+    particle.style.setProperty('--dy', `${Math.sin(angle) * midDistance - 25}px`);
+    particle.style.setProperty('--dx2', `${Math.cos(angle) * endDistance}px`);
+    particle.style.setProperty('--dy2', `${Math.sin(angle) * endDistance - lift}px`);
+    particle.style.setProperty('--dr', `${-120 + Math.random() * 240}deg`);
+    particle.style.setProperty('--dr2', `${-260 + Math.random() * 520}deg`);
+    particle.style.animationDelay = `${Math.random() * 80}ms`;
+
+    container.appendChild(particle);
+    particle.addEventListener('animationend', () => particle.remove(), { once: true });
+  }
+}
+
 // ── Utility ───────────────────────────────────────────────
 function esc(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
@@ -1027,11 +1060,11 @@ if (optionsBtn && optionsDropdown) {
 
 function triggerEmojiBomb(type) {
   if (type === 'success') {
-    createEmojiParticleSystem(['??', '??', '?', '??', '??', '?']);
-    showToast('Shaandaar! Party time! ??', 'success');
+    createEmojiParticleSystem(['\u{1F389}', '\u{1F38A}', '\u{2728}', '\u{1F973}', '\u{1F388}', '\u{2B50}'], 'success');
+    showToast('Shaandaar! Party time!', 'success');
   } else {
-    createEmojiParticleSystem(['??', '??', '??', '??', '??', '?']);
-    showToast('Koi baat nahi! Agli baar pakka! ??', 'info');
+    createEmojiParticleSystem(['\u{1F4AA}', '\u{1F525}', '\u{26A1}', '\u{1F680}', '\u{1F31F}', '\u{1F44F}'], 'fail');
+    showToast('Koi baat nahi! Agli baar pakka!', 'info');
   }
 }
 

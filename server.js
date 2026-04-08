@@ -148,6 +148,41 @@ app.delete('/api/todos/:id', auth, async (req, res) => {
 });
 
 // ─── Page Routes ─────────────────────────────────────────────────
+app.post('/api/feedback', async (req, res) => {
+  try {
+    const name = String(req.body?.name || '').trim();
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const type = String(req.body?.type || '').trim();
+    const message = String(req.body?.message || '').trim();
+    const rating = Number(req.body?.rating);
+
+    if (!message) {
+      return res.status(400).json({ success: false, message: 'Feedback message is required.' });
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+    }
+
+    const feedback = await Feedback.create({
+      name,
+      email,
+      type,
+      message,
+      rating: Number.isFinite(rating) ? Math.max(0, Math.min(5, rating)) : 0,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Feedback received successfully!',
+      feedbackId: feedback._id,
+    });
+  } catch (err) {
+    console.error('Feedback submission error:', err.message);
+    res.status(500).json({ success: false, message: 'Unable to save feedback right now.' });
+  }
+});
+
 app.get('/auth',    (_req, res) => res.sendFile(path.join(frontendPath, 'auth.html')));
 app.get('/learn',   (_req, res) => res.sendFile(path.join(frontendPath, 'learn.html')));
 app.get('/gallery', (_req, res) => res.sendFile(path.join(frontendPath, 'gallery.html')));
