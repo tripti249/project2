@@ -86,6 +86,16 @@ const noteSchema = new mongoose.Schema({
 
 const Note = mongoose.model('Note', noteSchema);
 
+const habitSchema = new mongoose.Schema({
+  userId:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  title:          { type: String, required: true, trim: true },
+  icon:           { type: String, default: '✨' },
+  completedDates: [{ type: String }], // Array of "YYYY-MM-DD"
+  streak:         { type: Number, default: 0 },
+}, { timestamps: true });
+
+const Habit = mongoose.model('Habit', habitSchema);
+
 // ─── Middleware ─────────────────────────────────────────────────
 app.use(cors({ origin: '*' }));
 app.use(express.json());
@@ -469,6 +479,46 @@ async function checkOverdueTasks() {
 
 setInterval(checkOverdueTasks, 60000);
 setTimeout(checkOverdueTasks, 5000);
+
+// ─── HABIT ROUTES (protected) ───────────────────────────────────
+
+app.get('/api/habits', auth, async (req, res) => {
+  try {
+    let habits = await Habit.find({ userId: req.user.id });
+    // If no habits exist, create some defaults
+    if (habits.length === 0) {
+      const defaults = [
+        { title: 'Drink Water', icon: '💧' },
+        { title: 'Exercise', icon: '🏃' },
+        { title: 'Study', icon: '📚' },
+        { title: 'Meditation', icon: '🧘' }
+      ];
+      habits = await Habit.insertMany(defaults.map(h => ({ ...h, userId: req.user.id })));
+    }
+    res.json({ success: true, habits });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+app.patch('/api/habits/:id/toggle', auth, async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const habit = await Habit.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!habit) return res.status(404).json({ success: false, message: 'Habit not found.' });
+
+    const index = habit.completedDates.indexOf(today);
+    if (index > -1) {
+      habit.completedDates.splice(index, 1);
+    } else {
+      habit.completedDates.push(today);
+    }
+    await habit.save();
+    res.json({ success: true, habit });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
 
 // ─── Health ─────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

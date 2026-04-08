@@ -206,10 +206,19 @@
         <span id="greeting" class="nav-greeting"></span>
       </div>
       <div class="nav-right">
-        <!-- Clicking the user card opens profile panel -->
         <div class="nav-actions">
+          <!-- Theme toggle -->
+          <button id="theme-toggle" class="nav-icon-btn theme-toggle" aria-label="Toggle dark/light mode" title="Toggle Theme">
+            <svg class="sun-icon hidden" viewBox="0 0 24 24" fill="none" width="20" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" width="20" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+
           <button class="nav-user-btn" id="open-profile-btn" aria-label="Open profile panel"
-            title="Profile &amp; Settings">
+            title="Profile & Settings">
             <div class="user-avatar" id="user-avatar">A</div>
             <div class="user-info" id="nav-user-info">
               <span class="user-name" id="user-name-display">User</span>
@@ -243,8 +252,14 @@
   <div class="hero-banner">
     <div class="hero-content">
       <div class="hero-text">
-        <h1>Get things <span class="hero-accent">done.</span></h1>
-        <p>Stay on top of your tasks, deadlines, and goals — one day at a time.</p>
+        <h1>Mera <span class="hero-accent">DINACHARYA</span></h1>
+        <p>Aapka personal productivity assistant.</p>
+        
+        <!-- Daily Quote Widget -->
+        <div id="daily-quote" class="daily-quote-widget">
+          <p id="quote-text">"Karm hi pooja hai."</p>
+          <span id="quote-author">— Mahatama Gandhi</span>
+        </div>
       </div>
       <div class="hero-illustration" aria-hidden="true">
         <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="banner-svg">
@@ -322,6 +337,14 @@
             </svg>
             <input type="text" id="task-input" class="main-input" placeholder="Aaj kya karna hai?" maxlength="200"
               aria-label="New task title" required />
+            <button type="button" id="voice-input-btn" class="voice-input-btn" title="Add task with voice">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
           </div>
           <button type="submit" id="add-btn" class="add-btn" aria-label="Add task">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -408,6 +431,23 @@
         </button>
       </div>
     </div>
+    
+    <!-- Habitat Tracker Section -->
+    <section class="habits-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2v20M2 12h20" stroke-opacity="0.2"/>
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+          Daily Habits
+        </h2>
+      </div>
+      <div id="habits-grid" class="habits-grid">
+        <!-- Habits will be rendered here -->
+      </div>
+    </section>
 
     <div class="tasks-container">
       <ul id="todo-list" class="todo-list" aria-label="Task list" aria-live="polite"></ul>
@@ -691,6 +731,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="motivation.js"></script>
   <script src="react-profile.js"></script>
 </body>
