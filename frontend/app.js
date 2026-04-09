@@ -1,3 +1,307 @@
+// ── AI Assistant Global Scope ─────────────────────────────
+// Expose early to prevent TDZ (Temporal Dead Zone) ReferenceErrors
+window.GopiBot = {
+  _todos: [],
+  updateContext(newTodos) { this._todos = newTodos; },
+
+  _knowledge: {
+    project: {
+      name: "AapkaDINACHARYA",
+      founder: "Aditya Maurya",
+      location: "Saraipitha, India 🇮🇳",
+      contact: "adityamaurya316@gmail.com",
+      tech: "Node.js, Express, MongoDB Atlas, JWT, bcrypt",
+    },
+    routines: {
+      morning: [
+        "Subah 5-6 AM uthne ki koshish karein. ☀️",
+        "Thoda garam pani piyein aur 10 min Meditation karein. 🧘",
+        "AapkaDINACHARYA mein High Priority tasks set karein.",
+        "Light exercise se din shuru karein! ⚡"
+      ],
+      focus: [
+        "**Pomodoro**: 25 min work, 5 min break. ⏱️",
+        "Mobile notifications off rakhein. 📵",
+        "Ek baar mein ek hi task karein. 🎯"
+      ],
+      health: [
+        "Pani pite rahein (8-10 glass). 💧",
+        "**20-20-20 Rule**: Har 20 min baad door dekhein. 👀",
+        "Healthy diet lein! 🥗"
+      ],
+      evening: [
+        "Sone se 1 ghanta pehle screens off.",
+        "Kal ke 3 main kaam plan karke soein.",
+        "Gratitude journaling karein!"
+      ],
+      productivity: [
+        "Eisenhower Matrix use karo: urgent vs important.",
+        "Single-tasking karo: multitasking productivity kam karti hai.",
+        "2-minute rule: jo kaam 2 min mein ho jaye, turant karo.",
+        "Deep work block: 60-90 min distraction-free session."
+      ],
+      appHelp: [
+        "Task add: Add New Task form se title + due date set karo.",
+        "Task edit: kisi task ke edit icon par click karo.",
+        "Task complete: checkbox tick karo.",
+        "Notes: NOTE button se notes modal open karo.",
+        "Profile settings: top-right user card se profile panel open hota hai."
+      ]
+    }
+  },
+
+  respond(message) {
+    const msg = message.toLowerCase().trim();
+    const u = JSON.parse(localStorage.getItem('adc_user') || '{}');
+    const name = (u.name || 'dost').split(' ')[0];
+
+    // Detect Task Addition (Integrated)
+    const taskAdd = this._taskAddHandler(msg);
+    if (taskAdd) return taskAdd;
+
+    // Greetings
+    if (/^(hi|hello|hey|namaste|hola|good\s*(morning|afternoon|evening)|namaskar)/.test(msg)) {
+      const h = new Date().getHours();
+      const time = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+      return { type: 'text', content: `Namaste, ${name}! 🙏 Good ${time}!\n\nMain **GOPICHANDRA** hoon — AapkaDINACHARYA AI helper. Bataiye aaj kya plan hai? 😊` };
+    }
+
+    // About Project / Founder
+    if (/(who (built|made|created)|founder|owner|banaya|developer)/.test(msg)) {
+      return { type: 'text', content: `AapkaDINACHARYA ko **${this._knowledge.project.founder}** ne banaya hai! 🇮🇳\n\nHum Bharat ke liye productivity simple bana rahe hain! 🚀` };
+    }
+    if (/(location|address|pata|where)/.test(msg)) {
+      return { type: 'text', content: `Humara base **${this._knowledge.project.location}** mein hai. 🏠✨` };
+    }
+    if (/(contact|support|email|puchna|phone)/.test(msg)) {
+      return { type: 'text', content: `Aap humein **${this._knowledge.project.contact}** pe email kar sakte hain! 📧` };
+    }
+    if (/(tech|stack|security|safe|data)/.test(msg)) {
+      return { type: 'text', content: `Aapka data safe hai! Hum **JWT** aur **bcrypt** use karte hain. Stack: **${this._knowledge.project.tech}**. ⚡` };
+    }
+
+    // Features
+    if (/(what can you do|help me|features|kya kar sakte ho)/.test(msg)) {
+      return { type: 'text', content: `Main ye kar sakta hoon: 🤖\n• 📊 Progress report\n• ⚠️ Overdue alerts\n• 📅 Daily Routines\n• 🧘 Health & Study Tips\n• 💡 Focus techniques\n\nDirectly puchiye: "Mera status kya hai?" ya "Morning routine batao"` };
+    }
+
+    // Routines
+    if (/(morning|subah|early|wakeup)/.test(msg)) {
+      return { type: 'text', content: `**Subah ki shuruat:** ☀️\n${this._knowledge.routines.morning.map(s=>"• "+s).join('\n')}` };
+    }
+    if (/(focus|distract|attention|concentrate)/.test(msg)) {
+      return { type: 'text', content: `**Focus Tips:** 🎯\n${this._knowledge.routines.focus.map(s=>"• "+s).join('\n')}` };
+    }
+    if (/(health|fit|paani|water|tired|diet)/.test(msg)) {
+      return { type: 'text', content: `**Health Advice:** 🥗\n${this._knowledge.routines.health.map(s=>"• "+s).join('\n')}` };
+    }
+    if (/(evening|raat|night|neend)/.test(msg)) {
+      return { type: 'text', content: `**Raat ka routine:**\n${this._knowledge.routines.evening.map(s=>`• ${s}`).join('\n')}` };
+    }
+    if (/(pomodoro|deep work|procrastinat|time block|discipline|consistency)/.test(msg)) {
+      return { type: 'text', content: `**Productivity Playbook:**\n${this._knowledge.routines.productivity.map(s=>`• ${s}`).join('\n')}` };
+    }
+
+    // App walkthrough and support intents
+    if (/(how to use|how do i use|app kaise use|guide|tutorial|help menu)/.test(msg)) {
+      return { type: 'text', content: `**App Quick Guide:**\n${this._knowledge.routines.appHelp.map(s=>`• ${s}`).join('\n')}` };
+    }
+    if (/(add task|new task|task kaise add|create task)/.test(msg)) {
+      return { type: 'text', content: 'Task add karne ke liye Add New Task section mein title likho, category/priority choose karo, due date set karo, phir Add Task button dabao.' };
+    }
+    if (/(edit task|update task|task kaise edit)/.test(msg)) {
+      return { type: 'text', content: 'Task card ke right side edit icon par click karo. Modal khulega, details change karo aur Save Changes karo.' };
+    }
+    if (/(delete task|remove task|task kaise delete)/.test(msg)) {
+      return { type: 'text', content: 'Task card ke delete icon se task remove hota hai. Completed tasks bulk delete ke liye Clear Done use karo.' };
+    }
+    if (/(notes|note kaise|open notes|rich text)/.test(msg)) {
+      return { type: 'text', content: 'Filter bar mein NOTE button se notes modal khulta hai. Wahan formatting, save aur delete sab available hai.' };
+    }
+    if (/(profile|change name|change password|avatar|photo|sidebar|slide bar)/.test(msg)) {
+      return { type: 'text', content: 'Top-right user card se profile panel open karo. Wahan name update, password change, photo upload/remove aur progress stats milenge.' };
+    }
+
+    // Plan builders
+    if (/(plan my day|daily plan|aaj ka plan bana|schedule bana)/.test(msg)) {
+      const today = todayStr();
+      const dueToday = this._todos.filter(x => !x.completed && x.endDate === today);
+      const high = this._todos.filter(x => !x.completed && x.priority === 'high').slice(0, 3);
+      const plan = [
+        'Top 1 high-priority task se start karo.',
+        '2 Pomodoro blocks (25-5) deep focus mein lagao.',
+        'Lunch se pehle ek medium task complete karo.',
+        'Shaam ko overdue check karke wrap-up karo.'
+      ];
+      const dueLine = dueToday.length ? `\n\nAaj due tasks:\n${dueToday.slice(0, 4).map(t => `• ${t.title}`).join('\n')}` : '';
+      const highLine = high.length ? `\n\nHigh-priority picks:\n${high.map(t => `• ${t.title}`).join('\n')}` : '';
+      return { type: 'text', content: `**Daily Action Plan:**\n${plan.map(s => `• ${s}`).join('\n')}${dueLine}${highLine}` };
+    }
+
+    // Time/Date utility
+    if (/(time kya hai|what time|current time|date kya hai|today date|aaj ki date|day today)/.test(msg)) {
+      const now = new Date();
+      const dateText = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const timeText = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      return { type: 'text', content: `Abhi ${timeText} hai aur aaj ${dateText} hai.` };
+    }
+
+    // Learning / Career intents
+    if (/(study|exam|revision|padhai|test prep)/.test(msg)) {
+      return { type: 'text', content: '**Study Sprint Strategy:**\n• 50 min study + 10 min break\n• Active recall + short notes\n• Raat ko 20 min revision\n• Kal ke liye 3 target topics likho' };
+    }
+    if (/(interview|coding|dsa|resume|career)/.test(msg)) {
+      return { type: 'text', content: '**Career Boost Plan:**\n• Roz 1 coding problem solve karo\n• Week mein 2 mock interview sessions\n• Resume ko impact bullets mein update karo\n• LinkedIn/GitHub par weekly progress share karo' };
+    }
+    if (/(weekly plan|plan my week|week schedule|saptah plan)/.test(msg)) {
+      return { type: 'text', content: '**Weekly Plan:**\n• Monday: planning + toughest task\n• Tue-Thu: deep work blocks + task execution\n• Friday: review, cleanup, and pending closure\n• Saturday: learning/project build\n• Sunday: rest and next-week setup' };
+    }
+    if (/(budget|save money|expense|kharcha|finance)/.test(msg)) {
+      return { type: 'text', content: '**Money Discipline Starter:**\n• 50/30/20 rule se monthly split start karo\n• Har expense 14 din track karo\n• Salary day par auto-savings set karo\n• Subscriptions monthly audit karo' };
+    }
+    if (/(email|mail draft|professional message|application)/.test(msg)) {
+      return { type: 'text', content: '**Professional Message Template:**\n• Subject: clear outcome\n• Context: 1-2 lines\n• Ask: exact action required\n• Deadline: concrete date/time\n• Close: thanks + signature' };
+    }
+    if (/(sleep better|insomnia|sleep issue|neend nahi)/.test(msg)) {
+      return { type: 'text', content: '**Better Sleep Plan:**\n• Same sleep/wake timing daily\n• 45 min before bed screen off\n• Evening caffeine avoid karo\n• Next-day task list likhkar mind unload karo' };
+    }
+
+    // Wellness and mindset intents
+    if (/(stress|anxiety|overwhelm|burnout|panic)/.test(msg)) {
+      return { type: 'text', content: 'Pehle slow breathing try karo: 4 sec inhale, 4 hold, 6 exhale, 5 rounds. Phir bas next one small task choose karo. Agar stress zyada ho to trusted person se baat zaroor karo.' };
+    }
+    if (/(quote|affirmation|confidence|self doubt)/.test(msg)) {
+      const lines = [
+        'Progress > perfection. Roz ka ek step hi game jeetata hai.',
+        'Clarity action se aati hai, overthinking se nahi.',
+        'Tum consistency pe focus rakho, results follow karenge.'
+      ];
+      return { type: 'text', content: lines[Math.floor(Math.random() * lines.length)] };
+    }
+
+    // Lightweight unit conversion
+    const kmMatch = msg.match(/(\d+(?:\.\d+)?)\s*km\s*(?:to|in)\s*miles?/);
+    if (kmMatch) {
+      const km = parseFloat(kmMatch[1]);
+      return { type: 'text', content: `${km} km is about ${(km * 0.621371).toFixed(2)} miles.` };
+    }
+    const cMatch = msg.match(/(\d+(?:\.\d+)?)\s*(?:c|celsius)\s*(?:to|in)\s*(?:f|fahrenheit)/);
+    if (cMatch) {
+      const c = parseFloat(cMatch[1]);
+      return { type: 'text', content: `${c}C is ${((c * 9) / 5 + 32).toFixed(1)}F.` };
+    }
+    const kgMatch = msg.match(/(\d+(?:\.\d+)?)\s*kg\s*(?:to|in)\s*(?:lb|lbs|pounds?)/);
+    if (kgMatch) {
+      const kg = parseFloat(kgMatch[1]);
+      return { type: 'text', content: `${kg} kg is ${(kg * 2.20462).toFixed(2)} lb.` };
+    }
+
+    if (/(weather|news|stock price|bitcoin|live score)/.test(msg)) {
+      return { type: 'text', content: 'Main live internet data direct fetch nahi karta. Lekin aap topic batao, main context samjhaakar best action plan de sakta hoon.' };
+    }
+
+    // Tasks Integration
+    if (/(how many|total|count|summary|kitne|mera kya|status|progress)/.test(msg)) return { type: 'text', content: this._taskSummary(name) };
+    if (/(overdue|late|missed|time nikal)/.test(msg)) return { type: 'text', content: this._overdueInfo(name) };
+    if (/(today|aaj|due today)/.test(msg)) return { type: 'text', content: this._todayInfo(name) };
+    if (/(completed|done|finished|kitna hua)/.test(msg)) return { type: 'text', content: this._completedInfo(name) };
+    if (/(upcoming|soon|next|kal)/.test(msg)) return { type: 'text', content: this._upcomingInfo(name) };
+    if (/(high priority|urgent|important|zaruri)/.test(msg)) return { type: 'text', content: this._highPriorityInfo(name) };
+
+    // Motivation
+    if (/(motivat|inspire|demotivat|stuck|energy|stressed|bore|man nahi)/.test(msg)) {
+      const q = [
+        "💪 **Aasaan hai!** - Sandeep Maheshwari ka mantra yaad rakho. Ek task se shuru karo!",
+        "🔥 Maidaan mat chhodo! Harshvardhan Jain kehte hain energy hi sab kuch hai. Go for it!",
+        "🚀 Har bada sapna ek chote step se shuru hota hai. Aaj ka High Priority task khatam karo!"
+      ];
+      return { type: 'text', content: q[Math.floor(Math.random() * q.length)] };
+    }
+
+    // Math
+    const mathMatch = msg.match(/(\d+)\s*([\+\-\*\/])\s*(\d+)/);
+    if (mathMatch) {
+      const a = parseInt(mathMatch[1]), op = mathMatch[2], b = parseInt(mathMatch[3]);
+      let res = op==='+'?a+b : op==='-'?a-b : op==='*'?a*b : b!==0?(a/b).toFixed(2):"Infinity";
+      return { type: 'text', content: `➕ **Math Result:**\n**${a} ${op} ${b} = ${res}**. 🤓` };
+    }
+
+    // Small Talk
+    if (/(kaise ho|how (are|r) (u|you))/.test(msg)) return { type: 'text', content: `Main mast hoon! 😎 Aap batao ${name}, aaj kitne tasks khatam karne hain?` };
+    if (/(thank|thanks|shukriya|dhanyawad|wow|great)/.test(msg)) return { type: 'text', content: `Bahut shukriya! 😊💜 Mujhe help karke khushi hui.` };
+    if (/(bye|goodbye|alvida|tata)/.test(msg)) return { type: 'text', content: `Alvida, ${name}! 👋 Apne goals pe focus karo! 🎯` };
+
+    // Fallback
+    return { type: 'text', content: `Mujhe aur context do, main help kar dunga.\nTry: "Plan my day", "How to use notes", "Study strategy", "Career plan", "2.5 km to miles", "What time is it?"` };
+  },
+
+  _taskAddHandler(m) {
+    const trRegex = /(?:from\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s+(?:to|till|-)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i;
+    const stRegex = /(?:at|by)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i;
+    let st = null, et = null;
+    let match = m.match(trRegex);
+    if (match) { st = match[1].trim(); et = match[2].trim(); m = m.replace(trRegex, ''); }
+    else { match = m.match(stRegex); if (match) { et = match[1].trim(); m = m.replace(stRegex, ''); } }
+
+    const eng = m.match(/add\s+(.+?)\s+to\s+(?:my\s+)?list/i);
+    if (eng) return { type: 'task', title: eng[1].trim(), startTime:st, endTime:et };
+    const direct = m.match(/add\s+task\s+(.+)/i);
+    if (direct) return { type: 'task', title: direct[1].trim(), startTime:st, endTime:et };
+    const remind = m.match(/(?:remind me to|remember to)\s+(.+)/i);
+    if (remind) return { type: 'task', title: remind[1].trim(), startTime:st, endTime:et };
+    const hin = m.match(/(.+?)\s+(?:add\s+)?(?:kar\s+do|kar\s+lo|daal\s+do)/i);
+    if (hin && hin[1].length > 2) return { type: 'task', title: hin[1].trim(), startTime:st, endTime:et };
+    return null;
+  },
+
+  _taskSummary(name) {
+    const t = this._todos.length;
+    const d = this._todos.filter(x => x.completed).length;
+    const o = this._todos.filter((todo) => typeof isTodoOverdue === 'function' && isTodoOverdue(todo)).length;
+    const p = t === 0 ? 0 : Math.round((d / t) * 100);
+    if (t === 0) return `${name}, abhi koi task nahi hai! ✨ Naya task add karke start karo.`;
+    return `📊 **Status Report:**\nTotal: **${t}** | Done: **${d}** | Pending: **${t-d}**\n⚠️ Overdue: **${o}**\n📈 Progress: **${p}%**\n\n${p>=75?'Mast kaam kar rahe ho!':'Lage raho dost!'} 🚀`;
+  },
+
+  _overdueInfo(name) {
+    const ov = this._todos.filter((todo) => typeof isTodoOverdue === 'function' && isTodoOverdue(todo));
+    if (ov.length === 0) return `${name}, koi overdue task nahi hai! ✅ Good job!`;
+    const list = ov.slice(0, 3).map(x => "• " + x.title).join('\n');
+    return `⚠️ **Overdue Alert!**\n${ov.length} tasks late hain:\n${list}\n\nInhe pehle finish karo! 🔥`;
+  },
+
+  _todayInfo(name) {
+    const today = typeof todayStr === 'function' ? todayStr() : '';
+    const due = this._todos.filter(x => !x.completed && x.endDate === today);
+    if (due.length === 0) return `${name}, aaj koi deadline nahi hai. Relax! 😊`;
+    return `📅 **Aaj ka target:**\n${due.map(x => "• " + x.title).join('\n')}\n\nFocus karo! 🎯`;
+  },
+
+  _completedInfo(name) {
+    const d = this._todos.filter(x => x.completed).length;
+    if (d === 0) return `${name}, abhi tak koi win nahi dikh rahi! Start small. 😅`;
+    return `🎉 **Celebration!** Aapne **${d} tasks** finish kiye hain. Habit bante ja rahi hai! 🏆`;
+  },
+
+  _upcomingInfo(name) {
+    const up = this._todos
+      .filter((todo) => !todo.completed && todo.endDate && (typeof isTodoOverdue === 'function' && !isTodoOverdue(todo)))
+      .sort((a, b) => (typeof getDueSortValue === 'function' ? getDueSortValue(a) - getDueSortValue(b) : 0))
+      .slice(0, 3);
+    if (up.length === 0) return `Aage ki list khali hai. 📅`;
+    return `📅 **Upcoming:**\n${up.map(x => "• " + x.title).join('\n')}\n\nTayyari rakho! 🚀`;
+  },
+
+  _highPriorityInfo(name) {
+    const h = this._todos.filter(x => !x.completed && x.priority === 'high');
+    if (h.length === 0) return `Koi High Priority pending nahi hai. Ease out! 😎`;
+    return `🔴 **Urgent:**\n${h.map(x => "• " + x.title).join('\n')}\n\nInhe pehle niptao! ⚡`;
+  }
+};
+
+window.dina = { updateContext(todos) { window.GopiBot.updateContext(todos); } };
+window.gopi = { updateContext(todos) { window.GopiBot.updateContext(todos); } };
+
 /* ════════════════════════════════════════════════════════
    AapkaDINACHARYA — Main Application Logic v3
    - Rebranded from TaskFlow
@@ -7,6 +311,56 @@
    ════════════════════════════════════════════════════════ */
 
 const API = '/api';
+
+// ── Utility Functions ─────────────────────────────────────
+const esc = (t) => String(t).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+const cap = (s) => (s && typeof s === 'string') ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+const fmtShort = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+function isTaskOnTime(todo) {
+  if (!todo.completed || !todo.endDate) return true;
+  const deadline = buildLocalDateTime(todo.endDate, todo.endTime, '23:59');
+  const completedAt = todo.updatedAt ? new Date(todo.updatedAt) : new Date();
+  return completedAt <= deadline;
+}
+
+const svgEdit = () => '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+const svgTrash = () => '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>';
+
+function createEmojiParticleSystem(emojis, variant = 'success') {
+  const container = document.getElementById('emoji-container');
+  if (!container || !Array.isArray(emojis) || !emojis.length) return;
+
+  const particleCount = 28;
+  const originX = window.innerWidth / 2;
+  const originY = Math.max(120, window.innerHeight * 0.28);
+
+  for (let i = 0; i < particleCount; i += 1) {
+    const particle = document.createElement('span');
+    const angle = ((Math.PI * 2) / particleCount) * i + ((Math.random() - 0.5) * 0.35);
+    const midDistance = 60 + Math.random() * 50;
+    const endDistance = 140 + Math.random() * 170;
+    const lift = 50 + Math.random() * 140;
+
+    particle.className = `emoji-particle ${variant}`;
+    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    particle.style.left = `${originX}px`;
+    particle.style.top = `${originY}px`;
+    
+    document.body.appendChild(particle);
+
+    particle.animate([
+      { transform: 'translate(-50%, -50%) scale(0)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${Math.cos(angle) * midDistance}px), calc(-50% + ${Math.sin(angle) * midDistance - lift / 2}px)) scale(1.2)`, opacity: 1, offset: 0.4 },
+      { transform: `translate(calc(-50% + ${Math.cos(angle) * endDistance}px), calc(-50% + ${Math.sin(angle) * endDistance + lift}px)) scale(1)`, opacity: 0 }
+    ], { duration: 1000 + Math.random() * 800, easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)', fill: 'forwards' });
+
+    setTimeout(() => { if (particle.parentNode) particle.remove(); }, 2000);
+  }
+}
+
 
 // ── Auth Guard ────────────────────────────────────────────
 const token = localStorage.getItem('adc_token');
@@ -26,10 +380,6 @@ let addEndTimePicker = null;
 let editStartTimePicker = null;
 let editEndTimePicker = null;
 let serviceWorkerRegistrationPromise = null;
-
-// Expose for task updates
-const dina = { updateContext(todos) { GopiBot.updateContext(todos); } };
-const gopi = { updateContext(todos) { GopiBot.updateContext(todos); } };
 
 
 // ── DOM — Navbar & Hero ───────────────────────────────────
@@ -1077,405 +1427,62 @@ function showToast(msg, type = 'success') {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-function createEmojiParticleSystem(emojis, variant = 'success') {
-  const container = document.getElementById('emoji-container');
-  if (!container || !Array.isArray(emojis) || !emojis.length) return;
-
-  const particleCount = 28;
-  const originX = window.innerWidth / 2;
-  const originY = Math.max(120, window.innerHeight * 0.28);
-
-  for (let i = 0; i < particleCount; i += 1) {
-    const particle = document.createElement('span');
-    const angle = ((Math.PI * 2) / particleCount) * i + ((Math.random() - 0.5) * 0.35);
-    const midDistance = 60 + Math.random() * 50;
-    const endDistance = 140 + Math.random() * 170;
-    const lift = 50 + Math.random() * 140;
-
-    particle.className = `emoji-particle ${variant}`;
-    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    particle.style.left = `${originX}px`;
-    particle.style.top = `${originY}px`;
-    particle.style.fontSize = `${1.4 + Math.random() * 1.2}rem`;
-    particle.style.setProperty('--dx', `${Math.cos(angle) * midDistance}px`);
-    particle.style.setProperty('--dy', `${Math.sin(angle) * midDistance - 25}px`);
-    particle.style.setProperty('--dx2', `${Math.cos(angle) * endDistance}px`);
-    particle.style.setProperty('--dy2', `${Math.sin(angle) * endDistance - lift}px`);
-    particle.style.setProperty('--dr', `${-120 + Math.random() * 240}deg`);
-    particle.style.setProperty('--dr2', `${-260 + Math.random() * 520}deg`);
-    particle.style.animationDelay = `${Math.random() * 80}ms`;
-
-    container.appendChild(particle);
-    particle.addEventListener('animationend', () => particle.remove(), { once: true });
+function createEmojiBomb(type) {
+  if (type === 'success') {
+    createEmojiParticleSystem(['\u{1F389}', '\u{1F38A}', '\u{2728}', '\u{1F973}', '\u{1F388}', '\u{2B50}'], 'success');
+  } else {
+    createEmojiParticleSystem(['\u{1F4AA}', '\u{1F525}', '\u{26A1}', '\u{1F680}', '\u{1F31F}', '\u{1F44F}'], 'fail');
   }
 }
-
-// ── Utility ───────────────────────────────────────────────
-function esc(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-function fmtDate(iso) { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
-function fmtShort(str) {
-  const [, m, d] = str.split('-');
-  return `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m - 1]} ${+d}`;
-}
-
-function dateDiff(from, to) { return Math.round((new Date(to) - new Date(from)) / 86400000); }
-
-function isTaskOnTime(todo) {
-  const deadline = getTodoDeadlineAt(todo);
-  return !deadline || new Date() <= deadline;
-}
-
-function svgEdit() { return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`; }
-function svgTrash() { return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`; }
-
-// ════════════════════════════════════════════════════════
-// GOPICHANDRA — AI CHATBOT (Enhanced)
-// ════════════════════════════════════════════════════════
-const GopiBot = {
-  _todos: [],
-  updateContext(newTodos) { this._todos = newTodos; },
-
-  _knowledge: {
-    project: {
-      name: "AapkaDINACHARYA",
-      founder: "Aditya Maurya",
-      location: "Saraipitha, India 🇮🇳",
-      contact: "adityamaurya316@gmail.com",
-      tech: "Node.js, Express, MongoDB Atlas, JWT, bcrypt",
-    },
-    routines: {
-      morning: [
-        "Subah 5-6 AM uthne ki koshish karein. ☀️",
-        "Thoda garam pani piyein aur 10 min Meditation karein. 🧘",
-        "AapkaDINACHARYA mein High Priority tasks set karein.",
-        "Light exercise se din shuru karein! ⚡"
-      ],
-      focus: [
-        "**Pomodoro**: 25 min work, 5 min break. ⏱️",
-        "Mobile notifications off rakhein. 📵",
-        "Ek baar mein ek hi task karein. 🎯"
-      ],
-      health: [
-        "Pani pite rahein (8-10 glass). 💧",
-        "**20-20-20 Rule**: Har 20 min baad door dekhein. 👀",
-        "Healthy diet lein! 🥗"
-      ],
-      evening: [
-        "Sone se 1 ghanta pehle screens off.",
-        "Kal ke 3 main kaam plan karke soein.",
-        "Gratitude journaling karein!"
-      ],
-      productivity: [
-        "Eisenhower Matrix use karo: urgent vs important.",
-        "Single-tasking karo: multitasking productivity kam karti hai.",
-        "2-minute rule: jo kaam 2 min mein ho jaye, turant karo.",
-        "Deep work block: 60-90 min distraction-free session."
-      ],
-      appHelp: [
-        "Task add: Add New Task form se title + due date set karo.",
-        "Task edit: kisi task ke edit icon par click karo.",
-        "Task complete: checkbox tick karo.",
-        "Notes: NOTE button se notes modal open karo.",
-        "Profile settings: top-right user card se profile panel open hota hai."
-      ]
-    }
-  },
-
-  respond(message) {
-    const msg = message.toLowerCase().trim();
-    const u = JSON.parse(localStorage.getItem('adc_user') || '{}');
-    const name = (u.name || 'dost').split(' ')[0];
-
-    // Detect Task Addition (Integrated)
-    const taskAdd = this._taskAddHandler(msg);
-    if (taskAdd) return taskAdd;
-
-    // Greetings
-    if (/^(hi|hello|hey|namaste|hola|good\s*(morning|afternoon|evening)|namaskar)/.test(msg)) {
-      const h = new Date().getHours();
-      const time = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
-      return { type: 'text', content: `Namaste, ${name}! 🙏 Good ${time}!\n\nMain **GOPICHANDRA** hoon — AapkaDINACHARYA AI helper. Bataiye aaj kya plan hai? 😊` };
-    }
-
-    // About Project / Founder
-    if (/(who (built|made|created)|founder|owner|banaya|developer)/.test(msg)) {
-      return { type: 'text', content: `AapkaDINACHARYA ko **${this._knowledge.project.founder}** ne banaya hai! 🇮🇳\n\nHum Bharat ke liye productivity simple bana rahe hain! 🚀` };
-    }
-    if (/(location|address|pata|where)/.test(msg)) {
-      return { type: 'text', content: `Humara base **${this._knowledge.project.location}** mein hai. 🏠✨` };
-    }
-    if (/(contact|support|email|puchna|phone)/.test(msg)) {
-      return { type: 'text', content: `Aap humein **${this._knowledge.project.contact}** pe email kar sakte hain! 📧` };
-    }
-    if (/(tech|stack|security|safe|data)/.test(msg)) {
-      return { type: 'text', content: `Aapka data safe hai! Hum **JWT** aur **bcrypt** use karte hain. Stack: **${this._knowledge.project.tech}**. ⚡` };
-    }
-
-    // Features
-    if (/(what can you do|help me|features|kya kar sakte ho)/.test(msg)) {
-      return { type: 'text', content: `Main ye kar sakta hoon: 🤖\n• 📊 Progress report\n• ⚠️ Overdue alerts\n• 📅 Daily Routines\n• 🧘 Health & Study Tips\n• 💡 Focus techniques\n\nDirectly puchiye: "Mera status kya hai?" ya "Morning routine batao"` };
-    }
-
-    // Routines
-    if (/(morning|subah|early|wakeup)/.test(msg)) {
-      return { type: 'text', content: `**Subah ki shuruat:** ☀️\n${this._knowledge.routines.morning.map(s=>"• "+s).join('\n')}` };
-    }
-    if (/(focus|distract|attention|concentrate)/.test(msg)) {
-      return { type: 'text', content: `**Focus Tips:** 🎯\n${this._knowledge.routines.focus.map(s=>"• "+s).join('\n')}` };
-    }
-    if (/(health|fit|paani|water|tired|diet)/.test(msg)) {
-      return { type: 'text', content: `**Health Advice:** 🥗\n${this._knowledge.routines.health.map(s=>"• "+s).join('\n')}` };
-    }
-    if (/(evening|raat|night|neend)/.test(msg)) {
-      return { type: 'text', content: `**Raat ka routine:**\n${this._knowledge.routines.evening.map(s=>`• ${s}`).join('\n')}` };
-    }
-    if (/(pomodoro|deep work|procrastinat|time block|discipline|consistency)/.test(msg)) {
-      return { type: 'text', content: `**Productivity Playbook:**\n${this._knowledge.routines.productivity.map(s=>`• ${s}`).join('\n')}` };
-    }
-
-    // App walkthrough and support intents
-    if (/(how to use|how do i use|app kaise use|guide|tutorial|help menu)/.test(msg)) {
-      return { type: 'text', content: `**App Quick Guide:**\n${this._knowledge.routines.appHelp.map(s=>`• ${s}`).join('\n')}` };
-    }
-    if (/(add task|new task|task kaise add|create task)/.test(msg)) {
-      return { type: 'text', content: 'Task add karne ke liye Add New Task section mein title likho, category/priority choose karo, due date set karo, phir Add Task button dabao.' };
-    }
-    if (/(edit task|update task|task kaise edit)/.test(msg)) {
-      return { type: 'text', content: 'Task card ke right side edit icon par click karo. Modal khulega, details change karo aur Save Changes karo.' };
-    }
-    if (/(delete task|remove task|task kaise delete)/.test(msg)) {
-      return { type: 'text', content: 'Task card ke delete icon se task remove hota hai. Completed tasks bulk delete ke liye Clear Done use karo.' };
-    }
-    if (/(notes|note kaise|open notes|rich text)/.test(msg)) {
-      return { type: 'text', content: 'Filter bar mein NOTE button se notes modal khulta hai. Wahan formatting, save aur delete sab available hai.' };
-    }
-    if (/(profile|change name|change password|avatar|photo|sidebar|slide bar)/.test(msg)) {
-      return { type: 'text', content: 'Top-right user card se profile panel open karo. Wahan name update, password change, photo upload/remove aur progress stats milenge.' };
-    }
-
-    // Plan builders
-    if (/(plan my day|daily plan|aaj ka plan bana|schedule bana)/.test(msg)) {
-      const today = todayStr();
-      const dueToday = this._todos.filter(x => !x.completed && x.endDate === today);
-      const high = this._todos.filter(x => !x.completed && x.priority === 'high').slice(0, 3);
-      const plan = [
-        'Top 1 high-priority task se start karo.',
-        '2 Pomodoro blocks (25-5) deep focus mein lagao.',
-        'Lunch se pehle ek medium task complete karo.',
-        'Shaam ko overdue check karke wrap-up karo.'
-      ];
-      const dueLine = dueToday.length ? `\n\nAaj due tasks:\n${dueToday.slice(0, 4).map(t => `• ${t.title}`).join('\n')}` : '';
-      const highLine = high.length ? `\n\nHigh-priority picks:\n${high.map(t => `• ${t.title}`).join('\n')}` : '';
-      return { type: 'text', content: `**Daily Action Plan:**\n${plan.map(s => `• ${s}`).join('\n')}${dueLine}${highLine}` };
-    }
-
-    // Time/Date utility
-    if (/(time kya hai|what time|current time|date kya hai|today date|aaj ki date|day today)/.test(msg)) {
-      const now = new Date();
-      const dateText = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      const timeText = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-      return { type: 'text', content: `Abhi ${timeText} hai aur aaj ${dateText} hai.` };
-    }
-
-    // Learning / Career intents
-    if (/(study|exam|revision|padhai|test prep)/.test(msg)) {
-      return { type: 'text', content: '**Study Sprint Strategy:**\n• 50 min study + 10 min break\n• Active recall + short notes\n• Raat ko 20 min revision\n• Kal ke liye 3 target topics likho' };
-    }
-    if (/(interview|coding|dsa|resume|career)/.test(msg)) {
-      return { type: 'text', content: '**Career Boost Plan:**\n• Roz 1 coding problem solve karo\n• Week mein 2 mock interview sessions\n• Resume ko impact bullets mein update karo\n• LinkedIn/GitHub par weekly progress share karo' };
-    }
-    if (/(weekly plan|plan my week|week schedule|saptah plan)/.test(msg)) {
-      return { type: 'text', content: '**Weekly Plan:**\n• Monday: planning + toughest task\n• Tue-Thu: deep work blocks + task execution\n• Friday: review, cleanup, and pending closure\n• Saturday: learning/project build\n• Sunday: rest and next-week setup' };
-    }
-    if (/(budget|save money|expense|kharcha|finance)/.test(msg)) {
-      return { type: 'text', content: '**Money Discipline Starter:**\n• 50/30/20 rule se monthly split start karo\n• Har expense 14 din track karo\n• Salary day par auto-savings set karo\n• Subscriptions monthly audit karo' };
-    }
-    if (/(email|mail draft|professional message|application)/.test(msg)) {
-      return { type: 'text', content: '**Professional Message Template:**\n• Subject: clear outcome\n• Context: 1-2 lines\n• Ask: exact action required\n• Deadline: concrete date/time\n• Close: thanks + signature' };
-    }
-    if (/(sleep better|insomnia|sleep issue|neend nahi)/.test(msg)) {
-      return { type: 'text', content: '**Better Sleep Plan:**\n• Same sleep/wake timing daily\n• 45 min before bed screen off\n• Evening caffeine avoid karo\n• Next-day task list likhkar mind unload karo' };
-    }
-
-    // Wellness and mindset intents
-    if (/(stress|anxiety|overwhelm|burnout|panic)/.test(msg)) {
-      return { type: 'text', content: 'Pehle slow breathing try karo: 4 sec inhale, 4 hold, 6 exhale, 5 rounds. Phir bas next one small task choose karo. Agar stress zyada ho to trusted person se baat zaroor karo.' };
-    }
-    if (/(quote|affirmation|confidence|self doubt)/.test(msg)) {
-      const lines = [
-        'Progress > perfection. Roz ka ek step hi game jeetata hai.',
-        'Clarity action se aati hai, overthinking se nahi.',
-        'Tum consistency pe focus rakho, results follow karenge.'
-      ];
-      return { type: 'text', content: lines[Math.floor(Math.random() * lines.length)] };
-    }
-
-    // Lightweight unit conversion
-    const kmMatch = msg.match(/(\d+(?:\.\d+)?)\s*km\s*(?:to|in)\s*miles?/);
-    if (kmMatch) {
-      const km = parseFloat(kmMatch[1]);
-      return { type: 'text', content: `${km} km is about ${(km * 0.621371).toFixed(2)} miles.` };
-    }
-    const cMatch = msg.match(/(\d+(?:\.\d+)?)\s*(?:c|celsius)\s*(?:to|in)\s*(?:f|fahrenheit)/);
-    if (cMatch) {
-      const c = parseFloat(cMatch[1]);
-      return { type: 'text', content: `${c}C is ${((c * 9) / 5 + 32).toFixed(1)}F.` };
-    }
-    const kgMatch = msg.match(/(\d+(?:\.\d+)?)\s*kg\s*(?:to|in)\s*(?:lb|lbs|pounds?)/);
-    if (kgMatch) {
-      const kg = parseFloat(kgMatch[1]);
-      return { type: 'text', content: `${kg} kg is ${(kg * 2.20462).toFixed(2)} lb.` };
-    }
-
-    if (/(weather|news|stock price|bitcoin|live score)/.test(msg)) {
-      return { type: 'text', content: 'Main live internet data direct fetch nahi karta. Lekin aap topic batao, main context samjhaakar best action plan de sakta hoon.' };
-    }
-
-    // Tasks Integration
-    if (/(how many|total|count|summary|kitne|mera kya|status|progress)/.test(msg)) return { type: 'text', content: this._taskSummary(name) };
-    if (/(overdue|late|missed|time nikal)/.test(msg)) return { type: 'text', content: this._overdueInfo(name) };
-    if (/(today|aaj|due today)/.test(msg)) return { type: 'text', content: this._todayInfo(name) };
-    if (/(completed|done|finished|kitna hua)/.test(msg)) return { type: 'text', content: this._completedInfo(name) };
-    if (/(upcoming|soon|next|kal)/.test(msg)) return { type: 'text', content: this._upcomingInfo(name) };
-    if (/(high priority|urgent|important|zaruri)/.test(msg)) return { type: 'text', content: this._highPriorityInfo(name) };
-
-    // Motivation
-    if (/(motivat|inspire|demotivat|stuck|energy|stressed|bore|man nahi)/.test(msg)) {
-      const q = [
-        "💪 **Aasaan hai!** - Sandeep Maheshwari ka mantra yaad rakho. Ek task se shuru karo!",
-        "🔥 Maidaan mat chhodo! Harshvardhan Jain kehte hain energy hi sab kuch hai. Go for it!",
-        "🚀 Har bada sapna ek chote step se shuru hota hai. Aaj ka High Priority task khatam karo!"
-      ];
-      return { type: 'text', content: q[Math.floor(Math.random() * q.length)] };
-    }
-
-    // Math
-    const mathMatch = msg.match(/(\d+)\s*([\+\-\*\/])\s*(\d+)/);
-    if (mathMatch) {
-      const a = parseInt(mathMatch[1]), op = mathMatch[2], b = parseInt(mathMatch[3]);
-      let res = op==='+'?a+b : op==='-'?a-b : op==='*'?a*b : b!==0?(a/b).toFixed(2):"Infinity";
-      return { type: 'text', content: `➕ **Math Result:**\n**${a} ${op} ${b} = ${res}**. 🤓` };
-    }
-
-    // Small Talk
-    if (/(kaise ho|how (are|r) (u|you))/.test(msg)) return { type: 'text', content: `Main mast hoon! 😎 Aap batao ${name}, aaj kitne tasks khatam karne hain?` };
-    if (/(thank|thanks|shukriya|dhanyawad|wow|great)/.test(msg)) return { type: 'text', content: `Bahut shukriya! 😊💜 Mujhe help karke khushi hui.` };
-    if (/(bye|goodbye|alvida|tata)/.test(msg)) return { type: 'text', content: `Alvida, ${name}! 👋 Apne goals pe focus karo! 🎯` };
-
-    // Fallback
-    return { type: 'text', content: `Mujhe aur context do, main help kar dunga.\nTry: "Plan my day", "How to use notes", "Study strategy", "Career plan", "2.5 km to miles", "What time is it?"` };
-  },
-
-  _taskAddHandler(m) {
-    const trRegex = /(?:from\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s+(?:to|till|-)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i;
-    const stRegex = /(?:at|by)\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i;
-    let st = null, et = null;
-    let match = m.match(trRegex);
-    if (match) { st = match[1].trim(); et = match[2].trim(); m = m.replace(trRegex, ''); }
-    else { match = m.match(stRegex); if (match) { et = match[1].trim(); m = m.replace(stRegex, ''); } }
-
-    const eng = m.match(/add\s+(.+?)\s+to\s+(?:my\s+)?list/i);
-    if (eng) return { type: 'task', title: eng[1].trim(), startTime:st, endTime:et };
-    const direct = m.match(/add\s+task\s+(.+)/i);
-    if (direct) return { type: 'task', title: direct[1].trim(), startTime:st, endTime:et };
-    const remind = m.match(/(?:remind me to|remember to)\s+(.+)/i);
-    if (remind) return { type: 'task', title: remind[1].trim(), startTime:st, endTime:et };
-    const hin = m.match(/(.+?)\s+(?:add\s+)?(?:kar\s+do|kar\s+lo|daal\s+do)/i);
-    if (hin && hin[1].length > 2) return { type: 'task', title: hin[1].trim(), startTime:st, endTime:et };
-    return null;
-  },
-
-  _taskSummary(name) {
-    const t = this._todos.length;
-    const d = this._todos.filter(x => x.completed).length;
-    const o = this._todos.filter((todo) => isTodoOverdue(todo)).length;
-    const p = t === 0 ? 0 : Math.round((d / t) * 100);
-    if (t === 0) return `${name}, abhi koi task nahi hai! ✨ Naya task add karke start karo.`;
-    return `📊 **Status Report:**\nTotal: **${t}** | Done: **${d}** | Pending: **${t-d}**\n⚠️ Overdue: **${o}**\n📈 Progress: **${p}%**\n\n${p>=75?'Mast kaam kar rahe ho!':'Lage raho dost!'} 🚀`;
-  },
-
-  _overdueInfo(name) {
-    const ov = this._todos.filter((todo) => isTodoOverdue(todo));
-    if (ov.length === 0) return `${name}, koi overdue task nahi hai! ✅ Good job!`;
-    const list = ov.slice(0, 3).map(x => "• " + x.title).join('\n');
-    return `⚠️ **Overdue Alert!**\n${ov.length} tasks late hain:\n${list}\n\nInhe pehle finish karo! 🔥`;
-  },
-
-  _todayInfo(name) {
-    const today = todayStr();
-    const due = this._todos.filter(x => !x.completed && x.endDate === today);
-    if (due.length === 0) return `${name}, aaj koi deadline nahi hai. Relax! 😊`;
-    return `📅 **Aaj ka target:**\n${due.map(x => "• " + x.title).join('\n')}\n\nFocus karo! 🎯`;
-  },
-
-  _completedInfo(name) {
-    const d = this._todos.filter(x => x.completed).length;
-    if (d === 0) return `${name}, abhi tak koi win nahi dikh rahi! Start small. 😅`;
-    return `🎉 **Celebration!** Aapne **${d} tasks** finish kiye hain. Habit bante ja rahi hai! 🏆`;
-  },
-
-  _upcomingInfo(name) {
-    const up = this._todos
-      .filter((todo) => !todo.completed && todo.endDate && !isTodoOverdue(todo))
-      .sort((a, b) => getDueSortValue(a) - getDueSortValue(b))
-      .slice(0, 3);
-    if (up.length === 0) return `Aage ki list khali hai. 📅`;
-    return `📅 **Upcoming:**\n${up.map(x => "• " + x.title).join('\n')}\n\nTayyari rakho! 🚀`;
-  },
-
-  _highPriorityInfo(name) {
-    const h = this._todos.filter(x => !x.completed && x.priority === 'high');
-    if (h.length === 0) return `Koi High Priority pending nahi hai. Ease out! 😎`;
-    return `🔴 **Urgent:**\n${h.map(x => "• " + x.title).join('\n')}\n\nInhe pehle niptao! ⚡`;
-  }
-};
 
 
 // ── Chatbot UI ─────────────────────────────────────────────
 const chatbotFab = document.getElementById('chatbot-fab');
 const chatbotWindow = document.getElementById('chatbot-window');
+const closeChatBtn = document.getElementById('close-chatbot-btn');
+const clearChatBtn = document.getElementById('clear-chat-btn');
+const cwMessages = document.getElementById('cw-messages');
+const cwInput = document.getElementById('cw-input');
+const cwSendBtn = document.getElementById('cw-send-btn');
+const cwQuickBtns = document.getElementById('cw-quick-btns');
+const chatUnread = document.getElementById('chatbot-unread');
+const fabIconChat = chatbotFab?.querySelector('.fab-icon-chat');
+const fabIconClose = chatbotFab?.querySelector('.fab-icon-close');
+
+let chatOpen = false;
+let hasWelcomed = false;
+
+function openChat() {
+  if (!chatbotWindow || !chatbotFab) return;
+  chatOpen = true;
+  chatbotWindow.classList.remove('hidden');
+  chatbotWindow.classList.add('open');
+  chatbotFab.classList.add('open');
+  if (fabIconChat) fabIconChat.classList.add('hidden');
+  if (fabIconClose) fabIconClose.classList.remove('hidden');
+  if (chatUnread) chatUnread.classList.add('hidden');
+  if (!hasWelcomed) {
+    hasWelcomed = true;
+    sendMessage('Namaste GOPICHANDRA! I just opened the chat.');
+  }
+  setTimeout(() => { if (cwInput) cwInput.focus(); }, 350);
+}
+
+function closeChat() {
+  if (!chatbotWindow || !chatbotFab) return;
+  chatOpen = false;
+  chatbotWindow.classList.remove('open');
+  chatbotFab.classList.remove('open');
+  if (fabIconChat) fabIconChat.classList.remove('hidden');
+  if (fabIconClose) fabIconClose.classList.add('hidden');
+}
+
 if (chatbotFab && chatbotWindow) {
-  const closeChatBtn = document.getElementById('close-chatbot-btn');
-  const clearChatBtn = document.getElementById('clear-chat-btn');
-  const cwMessages = document.getElementById('cw-messages');
-  const cwInput = document.getElementById('cw-input');
-  const cwSendBtn = document.getElementById('cw-send-btn');
-  const cwQuickBtns = document.getElementById('cw-quick-btns');
-  const chatUnread = document.getElementById('chatbot-unread');
-  const fabIconChat = chatbotFab.querySelector('.fab-icon-chat');
-  const fabIconClose = chatbotFab.querySelector('.fab-icon-close');
-
-  let chatOpen = false;
-  let hasWelcomed = false;
-
-  function openChat() {
-    chatOpen = true;
-    chatbotWindow.classList.remove('hidden'); // Ensure no stray hidden class
-    chatbotWindow.classList.add('open');
-    chatbotFab.classList.add('open');
-    if (fabIconChat) fabIconChat.classList.add('hidden');
-    if (fabIconClose) fabIconClose.classList.remove('hidden');
-    if (chatUnread) chatUnread.classList.add('hidden');
-    if (!hasWelcomed) {
-      hasWelcomed = true;
-      sendMessage('Namaste GOPICHANDRA! I just opened the chat.');
-    }
-    setTimeout(() => { if (cwInput) cwInput.focus(); }, 350);
-  }
-  function closeChat() {
-    chatOpen = false;
-    chatbotWindow.classList.remove('open');
-    chatbotFab.classList.remove('open');
-    if (fabIconChat) fabIconChat.classList.remove('hidden');
-    if (fabIconClose) fabIconClose.classList.add('hidden');
-  }
-
   chatbotFab.addEventListener('click', () => chatOpen ? closeChat() : openChat());
   if (closeChatBtn) closeChatBtn.addEventListener('click', closeChat);
-  if (clearChatBtn) clearChatBtn.addEventListener('click', () => { cwMessages.innerHTML = ''; });
+  if (clearChatBtn) clearChatBtn.addEventListener('click', () => { if (cwMessages) cwMessages.innerHTML = ''; });
 }
+
 
 function addUserMsg(text) {
   const u = JSON.parse(localStorage.getItem('adc_user') || '{}');
@@ -1660,6 +1667,7 @@ function sendChatPrompt(prompt) {
   if (!chatOpen) openChat();
   setTimeout(() => sendMessage(prompt), 180);
 }
+
 
 window.ADC_actions = {
   openProfilePanel: openProfile,
