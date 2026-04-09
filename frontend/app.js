@@ -677,7 +677,12 @@ function setProfileBtnLoading(btn, loading) {
 // ════════════════════════════════════════════════════════
 // LOGOUT
 // ════════════════════════════════════════════════════════
-function logout() {
+async function logout() {
+  // Save work before leaving
+  if (isNoteDirty) {
+    await saveNote(true);
+  }
+  
   localStorage.removeItem('adc_token');
   localStorage.removeItem('adc_user');
   window.location.replace('/auth');
@@ -1772,6 +1777,7 @@ window.addEventListener('load', () => {
 // -- Rich Text Notes System ----------------------------------
 let currentNoteId = null;
 let notesData = [];
+let isNoteDirty = false;
 
 // Use existing API and token from app scope
 // const API = 'http://localhost:5000/api'; (already defined above)
@@ -1814,6 +1820,10 @@ async function initNotes() {
   newNoteBtn.addEventListener('click', createNewNote);
   saveNoteBtn.addEventListener('click', saveNote);
   deleteNoteBtn.addEventListener('click', deleteNote);
+
+  // Dirty State Tracking (Auto-Save triggers)
+  noteTitleInput.addEventListener('input', () => { isNoteDirty = true; });
+  noteEditor.addEventListener('input', () => { isNoteDirty = true; });
 
   // RTE Toolbar Logic
   document.querySelectorAll('.rte-btn').forEach(btn => {
@@ -1905,9 +1915,15 @@ async function createNewNote() {
   showStatus('New note ready!');
 }
 
-async function saveNote() {
+async function saveNote(silent = false) {
   const currentToken = localStorage.getItem('adc_token');
-  if (!currentToken) return showToast('Please login to save notes.', 'error');
+  if (!currentToken) {
+    if (!silent) showToast('Please login to save notes.', 'error');
+    return;
+  }
+
+  // If silent (e.g. page closing) and nothing changed, skip
+  if (silent && !isNoteDirty) return;
 
   const noteData = {
     title:   noteTitleInput.value.trim() || 'Untitled Note',
@@ -1929,7 +1945,9 @@ async function saveNote() {
 
     const data = await res.json();
     if (data.success) {
-      showStatus('Note saved! ✨');
+      isNoteDirty = false; // Reset dirty flag on successful save
+      if (!silent) showStatus('Note saved! ✨');
+      
       if (!currentNoteId && data.note) {
         currentNoteId = data.note._id;
       }
@@ -1976,6 +1994,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Use adc_token specifically
   if (localStorage.getItem('adc_token')) {
     initNotes();
+  }
+});
+
+// Auto-Save listeners for page closing/leaving
+window.addEventListener('beforeunload', () => {
+  if (isNoteDirty) saveNote(true);
+});
+
+// For better mobile/modern browser reliability
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && isNoteDirty) {
+    saveNote(true);
   }
 });
 
