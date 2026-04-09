@@ -1431,44 +1431,46 @@ const GopiBot = {
 // ── Chatbot UI ─────────────────────────────────────────────
 const chatbotFab = document.getElementById('chatbot-fab');
 const chatbotWindow = document.getElementById('chatbot-window');
-const closeChatBtn = document.getElementById('close-chatbot-btn');
-const clearChatBtn = document.getElementById('clear-chat-btn');
-const cwMessages = document.getElementById('cw-messages');
-const cwInput = document.getElementById('cw-input');
-const cwSendBtn = document.getElementById('cw-send-btn');
-const cwQuickBtns = document.getElementById('cw-quick-btns');
-const chatUnread = document.getElementById('chatbot-unread');
-const fabIconChat = chatbotFab.querySelector('.fab-icon-chat');
-const fabIconClose = chatbotFab.querySelector('.fab-icon-close');
+if (chatbotFab && chatbotWindow) {
+  const closeChatBtn = document.getElementById('close-chatbot-btn');
+  const clearChatBtn = document.getElementById('clear-chat-btn');
+  const cwMessages = document.getElementById('cw-messages');
+  const cwInput = document.getElementById('cw-input');
+  const cwSendBtn = document.getElementById('cw-send-btn');
+  const cwQuickBtns = document.getElementById('cw-quick-btns');
+  const chatUnread = document.getElementById('chatbot-unread');
+  const fabIconChat = chatbotFab.querySelector('.fab-icon-chat');
+  const fabIconClose = chatbotFab.querySelector('.fab-icon-close');
 
-let chatOpen = false;
-let hasWelcomed = false;
+  let chatOpen = false;
+  let hasWelcomed = false;
 
-function openChat() {
-  chatOpen = true;
-  chatbotWindow.classList.add('open');
-  chatbotFab.classList.add('open');
-  fabIconChat.classList.add('hidden');
-  fabIconClose.classList.remove('hidden');
-  chatUnread.classList.add('hidden');
-  if (!hasWelcomed) {
-    hasWelcomed = true;
-    // For the initial greeting, we call the backend directly
-    sendMessage('Namaste GOPICHANDRA! I just opened the chat.');
+  function openChat() {
+    chatOpen = true;
+    chatbotWindow.classList.remove('hidden'); // Ensure no stray hidden class
+    chatbotWindow.classList.add('open');
+    chatbotFab.classList.add('open');
+    if (fabIconChat) fabIconChat.classList.add('hidden');
+    if (fabIconClose) fabIconClose.classList.remove('hidden');
+    if (chatUnread) chatUnread.classList.add('hidden');
+    if (!hasWelcomed) {
+      hasWelcomed = true;
+      sendMessage('Namaste GOPICHANDRA! I just opened the chat.');
+    }
+    setTimeout(() => { if (cwInput) cwInput.focus(); }, 350);
   }
-  setTimeout(() => cwInput.focus(), 350);
-}
-function closeChat() {
-  chatOpen = false;
-  chatbotWindow.classList.remove('open');
-  chatbotFab.classList.remove('open');
-  fabIconChat.classList.remove('hidden');
-  fabIconClose.classList.add('hidden');
-}
+  function closeChat() {
+    chatOpen = false;
+    chatbotWindow.classList.remove('open');
+    chatbotFab.classList.remove('open');
+    if (fabIconChat) fabIconChat.classList.remove('hidden');
+    if (fabIconClose) fabIconClose.classList.add('hidden');
+  }
 
-chatbotFab.addEventListener('click', () => chatOpen ? closeChat() : openChat());
-closeChatBtn.addEventListener('click', closeChat);
-clearChatBtn.addEventListener('click', () => { cwMessages.innerHTML = ''; });
+  chatbotFab.addEventListener('click', () => chatOpen ? closeChat() : openChat());
+  if (closeChatBtn) closeChatBtn.addEventListener('click', closeChat);
+  if (clearChatBtn) clearChatBtn.addEventListener('click', () => { cwMessages.innerHTML = ''; });
+}
 
 function addUserMsg(text) {
   const u = JSON.parse(localStorage.getItem('adc_user') || '{}');

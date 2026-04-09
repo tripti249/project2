@@ -42,30 +42,29 @@ const MEAL_PLANS = {
   }
 };
 
-function initHealthAssistant() {
-  var healthFab      = document.getElementById('health-fab');
-  var healthWindow   = document.getElementById('health-window');
-  var closeHealthBtn = document.getElementById('close-health-btn');
-  var hwCalcBtn      = document.getElementById('hw-calc-btn');
-  var hwBackBtn      = document.getElementById('hw-back-btn');
-  var hwForm         = document.getElementById('hw-form');
-  var hwResults      = document.getElementById('hw-results');
-  var hwStaticPlan   = document.getElementById('hw-static-plan');
+(function() {
+  function initHealthAssistant() {
+    var healthFab      = document.getElementById('health-fab');
+    var healthWindow   = document.getElementById('health-window');
+    var closeHealthBtn = document.getElementById('close-health-btn');
+    var hwCalcBtn      = document.getElementById('hw-calc-btn');
+    var hwBackBtn      = document.getElementById('hw-back-btn');
+    var hwForm         = document.getElementById('hw-form');
+    var hwResults      = document.getElementById('hw-results');
+    var hwStaticPlan   = document.getElementById('hw-static-plan');
 
-  if (!healthFab) return;
+    if (!healthFab) return;
 
-  // Panel Toggling
-  healthFab.addEventListener('click', function() {
-    if (healthWindow) {
-      healthWindow.classList.toggle('hidden');
-      var chatbotWin = document.getElementById('chatbot-window');
-      var notesModal = document.getElementById('notes-modal');
-      if (chatbotWin) chatbotWin.classList.add('hidden');
-      if (notesModal) notesModal.classList.add('hidden');
-    }
-  });
+    // Panel Toggling
+    healthFab.addEventListener('click', function() {
+      if (healthWindow) {
+        healthWindow.classList.toggle('hidden');
+        var notesModal = document.getElementById('notes-modal');
+        if (notesModal) notesModal.classList.add('hidden');
+      }
+    });
 
-  if (closeHealthBtn) {
+    if (closeHealthBtn) {
     closeHealthBtn.addEventListener('click', function() {
       healthWindow.classList.add('hidden');
     });
@@ -229,8 +228,9 @@ function renderMealPlan(type) {
   if (typeof showToast === 'function') showToast('Loading expert ' + plan.title + '...', 'info');
 }
 
-// Auto-run on load
-window.addEventListener('load', function() {
-  initHealthAssistant();
-  console.log('Health Hub Fully Functional');
-});
+  // Auto-run on load
+  window.addEventListener('load', function() {
+    initHealthAssistant();
+    console.log('Health Hub Fully Functional');
+  });
+})();
