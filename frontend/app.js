@@ -27,6 +27,11 @@ let editStartTimePicker = null;
 let editEndTimePicker = null;
 let serviceWorkerRegistrationPromise = null;
 
+// Expose for task updates
+const dina = { updateContext(todos) { GopiBot.updateContext(todos); } };
+const gopi = { updateContext(todos) { GopiBot.updateContext(todos); } };
+
+
 // ── DOM — Navbar & Hero ───────────────────────────────────
 const greeting = document.getElementById('greeting');
 const userAvatarEl = document.getElementById('user-avatar');
@@ -1573,8 +1578,7 @@ cwQuickBtns.querySelectorAll('.cw-quick-btn').forEach(btn => {
 });
 
 // Expose for task updates
-const dina = { updateContext(todos) { GopiBot.updateContext(todos); } };
-const gopi = { updateContext(todos) { GopiBot.updateContext(todos); } };
+
 
 // -- Motivational Options Logic -----------------------------
 const optionsBtn = document.getElementById('options-btn');

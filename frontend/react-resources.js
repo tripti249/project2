@@ -58,7 +58,7 @@
                 onKeyDown: (e) => { if(e.key === 'Enter' || e.key === ' ') toggleModal(e); }
               },
               h('img', {
-                src: '/assets/btech-notes.png',
+                src: '/assets/AKTU-BTech-Important-Questions-Notes.webp',
                 alt: 'BTECH Resources Banner',
                 className: 'resources-img',
               }),
