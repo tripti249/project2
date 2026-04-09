@@ -1853,9 +1853,12 @@ function checkEditorState() {
 
 // API Operations
 async function fetchNotes() {
+  const currentToken = localStorage.getItem('adc_token');
+  if (!currentToken) return;
+
   try {
     const res = await fetch(`${API}/notes`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Authorization': `Bearer ${currentToken}` }
     });
     const data = await res.json();
     if (data.success) {
@@ -1901,6 +1904,9 @@ async function createNewNote() {
 }
 
 async function saveNote() {
+  const currentToken = localStorage.getItem('adc_token');
+  if (!currentToken) return showToast('Please login to save notes.', 'error');
+
   const noteData = {
     title:   noteTitleInput.value.trim() || 'Untitled Note',
     content: noteEditor.innerHTML
@@ -1914,7 +1920,7 @@ async function saveNote() {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${currentToken}`
       },
       body: JSON.stringify(noteData)
     });
@@ -1935,10 +1941,13 @@ async function deleteNote() {
   if (!currentNoteId) return showToast('No note selected!', 'info');
   if (!confirm('Are you sure you want to delete this note?')) return;
 
+  const currentToken = localStorage.getItem('adc_token');
+  if (!currentToken) return;
+
   try {
     const res = await fetch(`${API}/notes/${currentNoteId}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Authorization': `Bearer ${currentToken}` }
     });
     const data = await res.json();
     if (data.success) {

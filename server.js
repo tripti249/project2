@@ -403,6 +403,61 @@ app.post('/api/notifications/subscribe', auth, async (req, res) => {
   }
 });
 
+
+// ─── NOTE ROUTES ───────────────────────────────────────────────
+
+app.get('/api/notes', auth, async (req, res) => {
+  try {
+    const notes = await Note.find({ userId: req.user.id }).sort({ updatedAt: -1 });
+    res.json({ success: true, notes });
+  } catch (err) {
+    console.error('GET /api/notes failed:', err.message);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+app.post('/api/notes', auth, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const note = await Note.create({
+      userId: req.user.id,
+      title: title || 'Untitled Note',
+      content: content || ''
+    });
+    res.status(201).json({ success: true, note });
+  } catch (err) {
+    console.error('POST /api/notes failed:', err.message);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+app.patch('/api/notes/:id', auth, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const note = await Note.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      { title, content },
+      { new: true }
+    );
+    if (!note) return res.status(404).json({ success: false, message: 'Note not found.' });
+    res.json({ success: true, note });
+  } catch (err) {
+    console.error('PATCH /api/notes/:id failed:', err.message);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+app.delete('/api/notes/:id', auth, async (req, res) => {
+  try {
+    const note = await Note.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    if (!note) return res.status(404).json({ success: false, message: 'Note not found.' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /api/notes/:id failed:', err.message);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
 // ─── Page Routes ─────────────────────────────────────────────────
 app.post('/api/feedback', async (req, res) => {
   try {
