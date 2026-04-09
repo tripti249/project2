@@ -1884,14 +1884,16 @@ function renderNotesList() {
 }
 
 async function selectNote(id) {
+  if (!id) return;
   currentNoteId = id;
   const note = notesData.find(n => n._id === id);
   if (note) {
-    noteTitleInput.value = note.title;
-    noteEditor.innerHTML = note.content;
+    noteTitleInput.value = note.title || 'Untitled Note';
+    noteEditor.innerHTML = note.content || '';
     
-    // Update font family if applicable (optional persistence of style)
+    // Refresh list to update active class
     renderNotesList();
+    noteEditor.focus();
   }
 }
 
@@ -1927,9 +1929,13 @@ async function saveNote() {
 
     const data = await res.json();
     if (data.success) {
-      showStatus('Note saved successfully! ✨');
+      showStatus('Note saved! ✨');
+      if (!currentNoteId && data.note) {
+        currentNoteId = data.note._id;
+      }
       await fetchNotes();
-      if (!currentNoteId && data.note) selectNote(data.note._id);
+      // Keep the current note active
+      if (currentNoteId) selectNote(currentNoteId);
     }
   } catch (err) {
     console.error('Save Note Error:', err);
